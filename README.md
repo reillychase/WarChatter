@@ -1,2 +1,2 @@
-# WarChat
+# WarChatter
 Python/PyQt PvPGN Chatbot
