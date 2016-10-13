@@ -1,5 +1,6 @@
 from PyQt4 import QtGui
 import sys
+import time
 import socket
 import ui
 import re
@@ -63,7 +64,7 @@ class chat_thread(QThread):
                             break
                 data = ''.join(total_data)
 
-                print 'WARJAMMER DEBUG: chat_thread.pvpgn_login() Output -----'
+                print 'WarChat DEBUG: chat_thread.pvpgn_login() Output -----'
                 print data
                 print '--------------------------------------------------'
 
@@ -108,8 +109,11 @@ class chat_thread(QThread):
                         print '-----------'
                         print data
                         print '------------'
+                        time.sleep(.1)
                 except:
+                    time.sleep(.1)
                     continue
+
 
     def run(self):
             print 'chat_thread.run()'
@@ -133,15 +137,24 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.users_in_chan = []
         self.endflag = 0
         self.input_msg.returnPressed.connect(self.send_msg)
+        # Gather and assign all the user input:
+        self.username = ''
+        self.password = ''
+        self.server = ''
 
     def send_msg(self):
         print 'WarChatter.send_msg()'
+        # Gather and assign all the user input:
+        self.username = self.input_username.text()
         self.msg = str(self.input_msg.text())
         self.input_msg.setText('')
         self.get_thread.s.send(self.msg)
         self.get_thread.s.send("\r\n")
-        msg = '<span style=" font-size:8pt; font-weight:600; color: blue;" ><' + self.username + '></span><span style=" font-size:8pt; font-weight:600; color: white;" > ' + self.msg + '</span>'
-        self.catch_textedit_chat(msg, 'white')
+        if re.findall('^/', self.msg):
+            pass
+        else:
+            msg = '<span style="color: blue;">&lt;' + self.username + '&gt;</span><span style="color: white;" > ' + self.msg + '</span>'
+            self.catch_textedit_chat_2(msg, 'white')
 
     def logout(self):
 
@@ -159,7 +172,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                                               "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
                                               "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
                                               "p, li { white-space: pre-wrap; }\n"
-                                              "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:9pt; font-weight:400; font-style:normal;\" bgcolor=\"#000000\">\n"
+                                              "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:12pt; font-weight:400; font-style:normal;\" bgcolor=\"#000000\">\n"
                                               "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
                                               None))
         self.textedit_users.setText('')
@@ -167,7 +180,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                                                "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
                                                "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
                                                "p, li { white-space: pre-wrap; }\n"
-                                               "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:9pt; font-weight:400; font-style:normal;\" bgcolor=\"#d3d3d3\">\n"
+                                               "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:12pt; font-weight:400; font-style:normal;\" bgcolor=\"#d3d3d3\">\n"
                                                "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
                                                None))
         self.label_status_msg.setText("")
@@ -177,11 +190,11 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
     def login(self):
         print 'WarChat.login()'
+
         # Gather and assign all the user input:
         self.username = self.input_username.text()
         self.password = self.input_password.text()
         self.server = self.input_server.text()
-
         # Validate user input/check for missing params
         if not self.username or not self.password:
             self.label_status_msg.setText("Username/Password missing")
@@ -212,6 +225,9 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.label_status_msg.setText(msg)
         self.label_status_msg.setStyleSheet('color: ' + color)
 
+    def catch_textedit_chat_2(self, msg, color):
+        self.textedit_chat.append(msg)
+
     def catch_textedit_chat(self, msg, color):
 
         print 'WarChat.catch_textedit_chat()'
@@ -226,13 +242,13 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                                                           "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
                                                           "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
                                                           "p, li { white-space: pre-wrap; }\n"
-                                                          "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:9pt; font-weight:400; font-style:normal;\" bgcolor=\"#d3d3d3\">\n"
+                                                          "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:12pt; font-weight:400; font-style:normal;\" bgcolor=\"#d3d3d3\">\n"
                                                           "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
                                                           None))
                 self.users_in_chan[:] = []
                 self.update_textedit_users()
                 print re.findall('^Joining channel: (.+)$', line)
-                line = '<span style=" font-size:8pt; font-weight:600; color: green;" >' + line + '</span'
+                line = '<span style="color: green;">' + line + '</span>'
                 self.textedit_chat.append(line)
 
             elif re.findall('^\[(.+)\]$', line):
@@ -269,9 +285,19 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                     self.users_in_chan.remove(user[0])
                     self.update_textedit_users()
 
+            elif re.findall('^<(.+?)> ', line):
+                username = re.findall('^<(.+?)> ', line)[0]
+                line = '<span style="color: yellow;">&lt;' + username + '&gt;</span><span style="color: white;" > ' + line + '</span>'
+                self.textedit_chat.append(line)
+
+            elif re.findall('^ERROR: ', line):
+                line = line.replace("ERROR: ", "", 1)
+                line = '<span style="color: red;">' + line + '</span>'
+                self.textedit_chat.append(line)
+
 
             else:
-                self.textedit_chat.setStyleSheet('color: ' + color)
+                self.textedit_chat.setStyleSheet('color: yellow')
                 self.textedit_chat.append(line)
 
     def update_textedit_users(self):
@@ -280,7 +306,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                                                "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
                                                "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
                                                "p, li { white-space: pre-wrap; }\n"
-                                               "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:9pt; font-weight:400; font-style:normal;\" bgcolor=\"#d3d3d3\">\n"
+                                               "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:12pt; font-weight:400; font-style:normal;\" bgcolor=\"#d3d3d3\">\n"
                                                "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
                                                None))
         for user in self.users_in_chan:
