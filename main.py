@@ -80,7 +80,7 @@ class chat_thread(QThread):
                 elif "Your unique name:" in data:
                     self.connection_status = 1
                     self.emit(SIGNAL('catch_status_msg(QString, QString)'), 'Login success', 'green')
-                    self.emit(SIGNAL('catch_textedit_chat(QString, QString)'), data, 'light gray')
+                    self.emit(SIGNAL('catch_textedit_chat(QString, QString)'), data, 'white')
                     return
 
                 else:
@@ -103,7 +103,7 @@ class chat_thread(QThread):
 
                 data = self.s.recv(8192)
                 if data:
-                    self.emit(SIGNAL('catch_textedit_chat(QString, QString)'), data, 'light gray')
+                    self.emit(SIGNAL('catch_textedit_chat(QString, QString)'), data, 'white')
                     print '-----------'
                     print data
                     print '------------'
@@ -114,9 +114,10 @@ class chat_thread(QThread):
             print 'chat_thread.run()'
             self.pvpgn_login()
             if self.connection_status == 1:
+                self.emit(SIGNAL('catch_login_success(QString)'), 'yes')
                 self.loop_chat_recv()
 
-class WarChat(QtGui.QMainWindow, ui.Ui_MainWindow):
+class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
     def __init__(self):
         print 'WarChat.__init__()'
         # super allows us to access variables, methods etc in the ui.py file
@@ -124,6 +125,7 @@ class WarChat(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.setupUi(self)  # This is defined in ui.py file automatically
         # It sets up layout and widgets that are defined
         self.button_login.clicked.connect(self.login)
+        self.button_logout.clicked.connect(self.logout)
         self.button_send.clicked.connect(self.send_msg)
         self.textedit_chat.setReadOnly(True)
         self.textedit_users.setReadOnly(True)
@@ -133,6 +135,13 @@ class WarChat(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.get_thread.s.send(self.msg)
         self.get_thread.s.send("\r\n")
         self.catch_textedit_chat(self.msg, 'light gray')
+    def logout(self):
+        self.get_thread.s.send("/logout")
+        self.get_thread.s.send("\r\n")
+        self.get_thread.s.close()
+        self.label_status_msg.setText("")
+        self.label_status_msg.setStyleSheet('color: light gray')
+        self.stackedWidget.setCurrentIndex(0)
 
 
     def login(self):
@@ -156,12 +165,17 @@ class WarChat(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.connect(self.get_thread, SIGNAL("catch_status_msg(QString, QString)"), self.catch_status_msg)
         self.connect(self.get_thread, SIGNAL("catch_textedit_chat(QString, QString)"), self.catch_textedit_chat)
         self.connect(self.get_thread, SIGNAL("catch_textedit_users(QString, QString)"), self.catch_textedit_users)
+        self.connect(self.get_thread, SIGNAL("catch_login_success(QString)"), self.catch_login_success)
 
         # Start chat_thread
         self.get_thread.start()
 
         self.label_status_msg.setText("Connecting...")
         self.label_status_msg.setStyleSheet('color: light gray')
+
+    def catch_login_success(self, yes):
+        if yes == 'yes':
+            self.stackedWidget.setCurrentIndex(1)
 
     def catch_status_msg(self, msg, color):
 
@@ -187,7 +201,7 @@ class WarChat(QtGui.QMainWindow, ui.Ui_MainWindow):
 
 def main():
     app = QtGui.QApplication(sys.argv)  # A new instance of QApplication
-    form = WarChat()  # Set the form to be WarChat (ui.py)
+    form = WarChatter()  # Set the form to be WarChatter (ui.py)
     form.show()  # Show the form
     app.exec_()  # Execute the app
 
