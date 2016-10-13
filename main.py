@@ -2,6 +2,7 @@ from PyQt4 import QtGui
 import sys
 import socket
 import ui
+import re
 from PyQt4.QtCore import QThread, SIGNAL
 
 class chat_thread(QThread):
@@ -95,26 +96,26 @@ class chat_thread(QThread):
                 self.emit(SIGNAL('catch_status_msg(QString, QString)'), 'No reply from server', 'red')
                 self.connection_status = 0
                 return
-    def loop_chat_recv(self):
-        total_data = [];
-        data = ''
-        while True:
-            try:
 
-                data = self.s.recv(8192)
-                if data:
-                    self.emit(SIGNAL('catch_textedit_chat(QString, QString)'), data, 'white')
-                    print '-----------'
-                    print data
-                    print '------------'
-            except:
-                continue
+    def loop_chat_recv(self):
+        if self.end_flag == 0:
+            while True:
+                try:
+
+                    data = self.s.recv(8192)
+                    if data:
+                        self.emit(SIGNAL('catch_textedit_chat(QString, QString)'), data, 'white')
+                        print '-----------'
+                        print data
+                        print '------------'
+                except:
+                    continue
 
     def run(self):
             print 'chat_thread.run()'
             self.pvpgn_login()
             if self.connection_status == 1:
-                self.emit(SIGNAL('catch_login_success(QString)'), 'yes')
+                self.emit(SIGNAL('catch_login_success()'))
                 self.loop_chat_recv()
 
 class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
@@ -129,16 +130,46 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.button_send.clicked.connect(self.send_msg)
         self.textedit_chat.setReadOnly(True)
         self.textedit_users.setReadOnly(True)
+        self.users_in_chan = []
+        self.endflag = 0
+        self.input_msg.returnPressed.connect(self.send_msg)
 
     def send_msg(self):
+        print 'WarChatter.send_msg()'
         self.msg = str(self.input_msg.text())
+        self.input_msg.setText('')
         self.get_thread.s.send(self.msg)
         self.get_thread.s.send("\r\n")
-        self.catch_textedit_chat(self.msg, 'light gray')
+        msg = '<span style=" font-size:8pt; font-weight:600; color: blue;" ><' + self.username + '></span><span style=" font-size:8pt; font-weight:600; color: white;" > ' + self.msg + '</span>'
+        self.catch_textedit_chat(msg, 'white')
+
     def logout(self):
+
+        self.end_flag = 1
+        self.users_in_chan = []
+
         self.get_thread.s.send("/logout")
         self.get_thread.s.send("\r\n")
         self.get_thread.s.close()
+
+
+        self.textedit_chat.setText('')
+
+        self.textedit_chat.setHtml(ui._translate("MainWindow",
+                                              "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                              "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                              "p, li { white-space: pre-wrap; }\n"
+                                              "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:9pt; font-weight:400; font-style:normal;\" bgcolor=\"#000000\">\n"
+                                              "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
+                                              None))
+        self.textedit_users.setText('')
+        self.textedit_users.setHtml(ui._translate("MainWindow",
+                                               "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                               "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                               "p, li { white-space: pre-wrap; }\n"
+                                               "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:9pt; font-weight:400; font-style:normal;\" bgcolor=\"#d3d3d3\">\n"
+                                               "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
+                                               None))
         self.label_status_msg.setText("")
         self.label_status_msg.setStyleSheet('color: light gray')
         self.stackedWidget.setCurrentIndex(0)
@@ -146,7 +177,6 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
     def login(self):
         print 'WarChat.login()'
-        # TODO: Hide the login buttons / flip to next page
         # Gather and assign all the user input:
         self.username = self.input_username.text()
         self.password = self.input_password.text()
@@ -164,8 +194,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         # Setup signals to listen for and connect them to functions
         self.connect(self.get_thread, SIGNAL("catch_status_msg(QString, QString)"), self.catch_status_msg)
         self.connect(self.get_thread, SIGNAL("catch_textedit_chat(QString, QString)"), self.catch_textedit_chat)
-        self.connect(self.get_thread, SIGNAL("catch_textedit_users(QString, QString)"), self.catch_textedit_users)
-        self.connect(self.get_thread, SIGNAL("catch_login_success(QString)"), self.catch_login_success)
+        self.connect(self.get_thread, SIGNAL("catch_login_success()"), self.catch_login_success)
 
         # Start chat_thread
         self.get_thread.start()
@@ -173,9 +202,8 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.label_status_msg.setText("Connecting...")
         self.label_status_msg.setStyleSheet('color: light gray')
 
-    def catch_login_success(self, yes):
-        if yes == 'yes':
-            self.stackedWidget.setCurrentIndex(1)
+    def catch_login_success(self):
+        self.stackedWidget.setCurrentIndex(1)
 
     def catch_status_msg(self, msg, color):
 
@@ -188,15 +216,75 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
         print 'WarChat.catch_textedit_chat()'
 
-        self.textedit_chat.append(msg)
-        self.textedit_chat.setStyleSheet('color: ' + color)
+        # This is where all the chatroom data styling and filtering takes place
+        msg = str(msg)
+        msg = msg.splitlines()
+        for line in msg:
+            if re.findall('^Joining channel: "(.+)"$', line):
+                self.textedit_users.setText('')
+                self.textedit_users.setHtml(ui._translate("MainWindow",
+                                                          "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                                          "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                                          "p, li { white-space: pre-wrap; }\n"
+                                                          "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:9pt; font-weight:400; font-style:normal;\" bgcolor=\"#d3d3d3\">\n"
+                                                          "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
+                                                          None))
+                self.users_in_chan[:] = []
+                self.update_textedit_users()
+                print re.findall('^Joining channel: (.+)$', line)
+                line = '<span style=" font-size:8pt; font-weight:600; color: green;" >' + line + '</span'
+                self.textedit_chat.append(line)
+
+            elif re.findall('^\[(.+)\]$', line):
+                user_status_msg = re.findall('^\[(.+)\]$', line)
 
 
-    def catch_textedit_users(self, msg, color):
-        print 'WarChat.catch_textedit_users()'
+                if 'is here' in user_status_msg[0]:
+                    user = re.findall('^\[(.+) is here\]$', line)
+                    self.users_in_chan.append(user[0])
+                    self.update_textedit_users()
 
-        self.textedit_users.append(msg)
-        self.textedit_users.setStyleSheet('color: ' + color)
+                elif 'enters' in user_status_msg[0]:
+                    user = re.findall('^\[(.+) enters\]$', line)
+                    self.users_in_chan.append(user[0])
+                    self.update_textedit_users()
+
+                elif 'quit' in user_status_msg[0]:
+                    user = re.findall('^\[(.+) quit\]$', line)
+                    self.users_in_chan.remove(user[0])
+                    self.update_textedit_users()
+
+                elif 'leaves' in user_status_msg[0]:
+                    user = re.findall('^\[(.+) leaves\]$', line)
+                    self.users_in_chan.remove(user[0])
+                    self.update_textedit_users()
+
+                elif 'kicked' in user_status_msg[0]:
+                    user = re.findall('^\[(.+) has been kicked\]$', line)
+                    self.users_in_chan.remove(user[0])
+                    self.update_textedit_users()
+
+                elif 'banned' in user_status_msg[0]:
+                    user = re.findall('^\[(.+) has been banned\]$', line)
+                    self.users_in_chan.remove(user[0])
+                    self.update_textedit_users()
+
+
+            else:
+                self.textedit_chat.setStyleSheet('color: ' + color)
+                self.textedit_chat.append(line)
+
+    def update_textedit_users(self):
+        self.textedit_users.setText('')
+        self.textedit_users.setHtml(ui._translate("MainWindow",
+                                               "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                               "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                               "p, li { white-space: pre-wrap; }\n"
+                                               "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:9pt; font-weight:400; font-style:normal;\" bgcolor=\"#d3d3d3\">\n"
+                                               "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
+                                               None))
+        for user in self.users_in_chan:
+            self.textedit_users.append(user)
 
 
 def main():
