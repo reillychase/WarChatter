@@ -84,24 +84,25 @@ class chat_thread(QThread):
                 elif "Your unique name:" in data:
                     self.connection_status = 1
                     if self.channel:
-                        self.s.send("/join " + self.channel)
-                        self.s.send("\r\n")
-                        total_data = [];
-                        data = ''
-                        while True:
-                            data = self.s.recv(8192)
-                            if 'Joining channel:' in data or 'Login failed.' in data:
-                                total_data.append(data)
-                                break
-                            total_data.append(data)
-                            if len(total_data) > 1:
-                                # check if end_of_data was split
-                                last_pair = total_data[-2] + total_data[-1]
-                                if 'Joining channel:' in last_pair:
-                                    total_data[-2] = last_pair[:last_pair.find('Joining channel:')]
-                                    total_data.pop()
+                        if self.channel != "chat":
+                            self.s.send("/join " + self.channel)
+                            self.s.send("\r\n")
+                            total_data = [];
+                            data = ''
+                            while True:
+                                data = self.s.recv(8192)
+                                if 'Joining channel:' in data or 'Login failed.' in data:
+                                    total_data.append(data)
                                     break
-                        data = ''.join(total_data)
+                                total_data.append(data)
+                                if len(total_data) > 1:
+                                    # check if end_of_data was split
+                                    last_pair = total_data[-2] + total_data[-1]
+                                    if 'Joining channel:' in last_pair:
+                                        total_data[-2] = last_pair[:last_pair.find('Joining channel:')]
+                                        total_data.pop()
+                                        break
+                            data = ''.join(total_data)
                     self.emit(SIGNAL('catch_status_msg(QString, QString)'), 'Login success', 'green')
                     self.emit(SIGNAL('catch_textedit_chat(QString, QString)'), data, 'white')
                     return
@@ -126,6 +127,7 @@ class chat_thread(QThread):
 
                     data = self.s.recv(8192)
                     if data:
+
                         self.emit(SIGNAL('catch_textedit_chat(QString, QString)'), data, 'white')
                         print '-----------'
                         print data
@@ -179,24 +181,48 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         if self.msg_prefix:
             self.msg = self.msg_prefix + ' ' + self.msg
         self.input_msg.setText('')
+
         if re.findall('^/stats$', self.msg):
-            print 'stats for myself'
             self.msg = self.msg + ' ' + self.username + ' ' + self.client_tag
             print self.msg
             self.get_thread.s.send(str(self.msg))
             self.get_thread.s.send("\r\n")
 
         elif re.findall('^/stats (.+?)$', self.msg):
-            print 'stats for other'
             self.msg = self.msg + ' ' + self.client_tag
             print self.msg
             self.get_thread.s.send(str(self.msg))
             self.get_thread.s.send("\r\n")
 
         elif re.findall('^/', self.msg):
-            print 'a command was sent'
             self.get_thread.s.send(self.msg)
             self.get_thread.s.send("\r\n")
+
+
+        elif re.findall('(^https?)://(.+?)\..+', self.msg.lower()):
+
+            self.get_thread.s.send(self.msg)
+            self.get_thread.s.send("\r\n")
+
+            word_list = []
+            msg_words = self.msg.split()
+            for word in msg_words:
+                word_lower = word.lower()
+                if re.findall('^https?://.+?\..+', word_lower):
+                    link_parts = re.findall('^(https?://.+)', word_lower)
+                    link = link_parts[0]
+                    link = '<a href="' + link + '">' + link + '</a>'
+                    word_list.append(link)
+                else:
+                    word_list.append(word)
+
+            self.msg = ' '.join(word_list)
+
+            print self.msg
+
+            msg = '<span style="color: #00ffff;">&lt;' + self.username + '&gt;</span><span style="color: white;" > ' + self.msg + '</span>'
+            self.catch_textedit_chat_2(msg, 'white')
+
 
         else:
             self.get_thread.s.send(self.msg)
@@ -287,6 +313,27 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         msg = str(msg)
         msg = msg.splitlines()
         for line in msg:
+
+            self.link_flag = 0
+
+            if re.findall('https?://.+?\.', line.lower()):
+
+                msg_words = line.split()
+                word_list = []
+                for word in msg_words:
+                    word_lower = word.lower()
+                    if re.findall('^https?://.+?\..+', word_lower):
+                        link_parts = re.findall('^(https?://.+)', word_lower)
+                        link = link_parts[0]
+                        link = '<a href="' + link + '">' + link + '</a>'
+                        word_list.append(link)
+                    else:
+                        word_list.append(word)
+
+                self.line_w_links = ' '.join(word_list)
+                self.link_flag = 1
+
+
             if re.findall('^Joining channel: "(.+)"$', line):
                 self.textedit_users.setText('')
                 self.textedit_users.setHtml(ui._translate("MainWindow",
@@ -300,8 +347,13 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                 self.channel_name = re.findall('^Joining channel: "(.+)"$', line)[0]
                 self.update_textedit_users()
                 print re.findall('^Joining channel: (.+)$', line)
-                line = '<span style="color: #00ef00;">' + line + '</span>'
-                self.textedit_chat.append(line)
+
+                if self.link_flag == 0:
+                    line = '<span style="color: #00ef00;">' + line + '</span>'
+                    self.textedit_chat.append(line)
+                else:
+                    line = '<span style="color: #00ef00;">' + self.line_w_links + '</span>'
+                    self.textedit_chat.append(line)
 
             elif re.findall('^\[(.+)\]$', line):
                 user_status_msg = re.findall('^\[(.+)\]$', line)
@@ -339,29 +391,50 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
             elif re.findall('^ERROR: ', line):
                 line = line.replace("ERROR: ", "", 1)
-                line = '<span style="color: #ff0000;">' + line + '</span>'
-                self.textedit_chat.append(line)
+                if self.link_flag == 0:
+                    line = '<span style="color: #ff0000;">' + line + '</span>'
+                    self.textedit_chat.append(line)
+                else:
+                    line = '<span style="color: #ff0000;">' + self.line_w_links + '</span>'
+                    self.textedit_chat.append(line)
 
             elif re.findall('^<from (.+?)>', line):
                 username = re.findall('^<from (.+?)> ', line)[0]
-                line = line.replace("from ", "From:", 1)
-                line = '<span style="color: #ffff00;">&lt;From: ' + username + '&gt;</span><span style="color: gray;" > ' + line + '</span>'
-                self.textedit_chat.append(line)
+                if self.link_flag == 0:
+                    line = line.replace("from ", "From:", 1)
+                    line = '<span style="color: #ffff00;">&lt;From: ' + username + '&gt;</span><span style="color: gray;" > ' + line + '</span>'
+                    self.textedit_chat.append(line)
+                else:
+                    line = self.line_w_links.replace("from ", "From:", 1)
+                    line = '<span style="color: #ffff00;">&lt;From: ' + username + '&gt;</span><span style="color: gray;" > ' + line + '</span>'
+                    self.textedit_chat.append(line)
 
             elif re.findall('^<to (.+?)>', line):
                 username = re.findall('^<to (.+?)> ', line)[0]
-                line = line.replace("to ", "To:", 1)
-                line = '<span style="color: #00ffff;">&lt;To: ' + username + '&gt;</span><span style="color: gray;" > ' + line + '</span>'
-                self.textedit_chat.append(line)
+                if self.link_flag == 0:
+                    line = line.replace("to ", "To:", 1)
+                    line = '<span style="color: #00ffff;">&lt;To: ' + username + '&gt;</span><span style="color: gray;" > ' + line + '</span>'
+                    self.textedit_chat.append(line)
+                else:
+                    line = self.line_w_links.replace("to ", "To:", 1)
+                    line = '<span style="color: #00ffff;">&lt;To: ' + username + '&gt;</span><span style="color: gray;" > ' + line + '</span>'
+                    self.textedit_chat.append(line)
 
             elif re.findall('^<(.+?)> ', line):
                 username = re.findall('^<(.+?)> ', line)[0]
-                line = '<span style="color: #ffff00;">&lt;' + username + '&gt;</span><span style="color: white;" > ' + line + '</span>'
-                self.textedit_chat.append(line)
+                if self.link_flag == 0:
+                    line = '<span style="color: #ffff00;">&lt;' + username + '&gt;</span><span style="color: white;" > ' + line + '</span>'
+                    self.textedit_chat.append(line)
+                else:
+                    line = '<span style="color: #ffff00;">&lt;' + username + '&gt;</span><span style="color: white;" > ' + self.line_w_links + '</span>'
+                    self.textedit_chat.append(line)
 
             else:
                 self.textedit_chat.setStyleSheet('color: #ffff00')
-                self.textedit_chat.append(line)
+                if self.link_flag == 0:
+                    self.textedit_chat.append(line)
+                else:
+                    self.textedit_chat.append(self.line_w_links)
 
     def update_textedit_users(self):
         self.textedit_users.setText('')
