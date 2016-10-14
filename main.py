@@ -7,7 +7,7 @@ import re
 from PyQt4.QtCore import QThread, SIGNAL
 
 class chat_thread(QThread):
-    def __init__(self, username, password, server):
+    def __init__(self, username, password, server, channel, client_tag):
 
         print 'chat_thread.__init__()'
 
@@ -15,6 +15,8 @@ class chat_thread(QThread):
         self.username = str(username)
         self.password = str(password)
         self.server = str(server)
+        self.channel = str(channel)
+        self.client_tag = str(client_tag)
         self.login_attempts = 0
         self.end_flag = 0
 
@@ -81,6 +83,25 @@ class chat_thread(QThread):
 
                 elif "Your unique name:" in data:
                     self.connection_status = 1
+                    if self.channel:
+                        self.s.send("/join " + self.channel)
+                        self.s.send("\r\n")
+                        total_data = [];
+                        data = ''
+                        while True:
+                            data = self.s.recv(8192)
+                            if 'Joining channel:' in data or 'Login failed.' in data:
+                                total_data.append(data)
+                                break
+                            total_data.append(data)
+                            if len(total_data) > 1:
+                                # check if end_of_data was split
+                                last_pair = total_data[-2] + total_data[-1]
+                                if 'Joining channel:' in last_pair:
+                                    total_data[-2] = last_pair[:last_pair.find('Joining channel:')]
+                                    total_data.pop()
+                                    break
+                        data = ''.join(total_data)
                     self.emit(SIGNAL('catch_status_msg(QString, QString)'), 'Login success', 'green')
                     self.emit(SIGNAL('catch_textedit_chat(QString, QString)'), data, 'white')
                     return
@@ -137,6 +158,12 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.users_in_chan = []
         self.endflag = 0
         self.input_msg.returnPressed.connect(self.send_msg)
+        self.input_msg_prefix.returnPressed.connect(self.send_msg)
+        self.input_username.returnPressed.connect(self.login)
+        self.input_password.returnPressed.connect(self.login)
+        self.input_server.returnPressed.connect(self.login)
+        self.input_channel.returnPressed.connect(self.login)
+        self.input_client_tag.returnPressed.connect(self.login)
         # Gather and assign all the user input:
         self.username = ''
         self.password = ''
@@ -146,14 +173,35 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         print 'WarChatter.send_msg()'
         # Gather and assign all the user input:
         self.username = self.input_username.text()
+        self.msg_prefix = str(self.input_msg_prefix.text())
         self.msg = str(self.input_msg.text())
+
+        if self.msg_prefix:
+            self.msg = self.msg_prefix + ' ' + self.msg
         self.input_msg.setText('')
-        self.get_thread.s.send(self.msg)
-        self.get_thread.s.send("\r\n")
-        if re.findall('^/', self.msg):
-            pass
+        if re.findall('^/stats$', self.msg):
+            print 'stats for myself'
+            self.msg = self.msg + ' ' + self.username + ' ' + self.client_tag
+            print self.msg
+            self.get_thread.s.send(str(self.msg))
+            self.get_thread.s.send("\r\n")
+
+        elif re.findall('^/stats (.+?)$', self.msg):
+            print 'stats for other'
+            self.msg = self.msg + ' ' + self.client_tag
+            print self.msg
+            self.get_thread.s.send(str(self.msg))
+            self.get_thread.s.send("\r\n")
+
+        elif re.findall('^/', self.msg):
+            print 'a command was sent'
+            self.get_thread.s.send(self.msg)
+            self.get_thread.s.send("\r\n")
+
         else:
-            msg = '<span style="color: blue;">&lt;' + self.username + '&gt;</span><span style="color: white;" > ' + self.msg + '</span>'
+            self.get_thread.s.send(self.msg)
+            self.get_thread.s.send("\r\n")
+            msg = '<span style="color: #00ffff;">&lt;' + self.username + '&gt;</span><span style="color: white;" > ' + self.msg + '</span>'
             self.catch_textedit_chat_2(msg, 'white')
 
     def logout(self):
@@ -185,6 +233,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                                                None))
         self.label_status_msg.setText("")
         self.label_status_msg.setStyleSheet('color: light gray')
+        self.textedit_chat.setStyleSheet('color: #ffff00')
         self.stackedWidget.setCurrentIndex(0)
 
 
@@ -195,6 +244,8 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.username = self.input_username.text()
         self.password = self.input_password.text()
         self.server = self.input_server.text()
+        self.channel = self.input_channel.text()
+        self.client_tag = self.input_client_tag.text()
         # Validate user input/check for missing params
         if not self.username or not self.password:
             self.label_status_msg.setText("Username/Password missing")
@@ -202,7 +253,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
             return
 
         # Create chat_thread object
-        self.get_thread = chat_thread(self.username, self.password, self.server)
+        self.get_thread = chat_thread(self.username, self.password, self.server, self.channel, self.client_tag)
 
         # Setup signals to listen for and connect them to functions
         self.connect(self.get_thread, SIGNAL("catch_status_msg(QString, QString)"), self.catch_status_msg)
@@ -246,9 +297,10 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                                                           "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
                                                           None))
                 self.users_in_chan[:] = []
+                self.channel_name = re.findall('^Joining channel: "(.+)"$', line)[0]
                 self.update_textedit_users()
                 print re.findall('^Joining channel: (.+)$', line)
-                line = '<span style="color: green;">' + line + '</span>'
+                line = '<span style="color: #00ef00;">' + line + '</span>'
                 self.textedit_chat.append(line)
 
             elif re.findall('^\[(.+)\]$', line):
@@ -285,19 +337,30 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                     self.users_in_chan.remove(user[0])
                     self.update_textedit_users()
 
-            elif re.findall('^<(.+?)> ', line):
-                username = re.findall('^<(.+?)> ', line)[0]
-                line = '<span style="color: yellow;">&lt;' + username + '&gt;</span><span style="color: white;" > ' + line + '</span>'
-                self.textedit_chat.append(line)
-
             elif re.findall('^ERROR: ', line):
                 line = line.replace("ERROR: ", "", 1)
-                line = '<span style="color: red;">' + line + '</span>'
+                line = '<span style="color: #ff0000;">' + line + '</span>'
                 self.textedit_chat.append(line)
 
+            elif re.findall('^<from (.+?)>', line):
+                username = re.findall('^<from (.+?)> ', line)[0]
+                line = line.replace("from ", "From:", 1)
+                line = '<span style="color: #ffff00;">&lt;From: ' + username + '&gt;</span><span style="color: gray;" > ' + line + '</span>'
+                self.textedit_chat.append(line)
+
+            elif re.findall('^<to (.+?)>', line):
+                username = re.findall('^<to (.+?)> ', line)[0]
+                line = line.replace("to ", "To:", 1)
+                line = '<span style="color: #00ffff;">&lt;To: ' + username + '&gt;</span><span style="color: gray;" > ' + line + '</span>'
+                self.textedit_chat.append(line)
+
+            elif re.findall('^<(.+?)> ', line):
+                username = re.findall('^<(.+?)> ', line)[0]
+                line = '<span style="color: #ffff00;">&lt;' + username + '&gt;</span><span style="color: white;" > ' + line + '</span>'
+                self.textedit_chat.append(line)
 
             else:
-                self.textedit_chat.setStyleSheet('color: yellow')
+                self.textedit_chat.setStyleSheet('color: #ffff00')
                 self.textedit_chat.append(line)
 
     def update_textedit_users(self):
@@ -311,6 +374,8 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                                                None))
         for user in self.users_in_chan:
             self.textedit_users.append(user)
+        self.channel_user_count = len(self.users_in_chan)
+        self.label_channel.setText(self.channel_name + ' (' + str(self.channel_user_count) + ')')
 
 
 def main():

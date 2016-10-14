@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'warchatter.ui'
 #
-# Created: Thu Oct 13 12:51:51 2016
+# Created: Fri Oct 14 08:52:36 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -67,6 +67,9 @@ class Ui_MainWindow(object):
         self.input_channel = QtGui.QLineEdit(self.verticalLayoutWidget_4)
         self.input_channel.setObjectName(_fromUtf8("input_channel"))
         self.verticalLayout_6.addWidget(self.input_channel)
+        self.input_client_tag = QtGui.QLineEdit(self.verticalLayoutWidget_4)
+        self.input_client_tag.setObjectName(_fromUtf8("input_client_tag"))
+        self.verticalLayout_6.addWidget(self.input_client_tag)
         self.button_login = QtGui.QPushButton(self.verticalLayoutWidget_4)
         self.button_login.setObjectName(_fromUtf8("button_login"))
         self.verticalLayout_6.addWidget(self.button_login)
@@ -105,7 +108,7 @@ class Ui_MainWindow(object):
         self.textedit_chat = QtGui.QTextEdit(self.verticalLayoutWidget)
         self.textedit_chat.setReadOnly(True)
         self.textedit_chat.setObjectName(_fromUtf8("textedit_chat"))
-        self.gridLayout.addWidget(self.textedit_chat, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.textedit_chat, 1, 0, 1, 1)
         self.textedit_users = QtGui.QTextEdit(self.verticalLayoutWidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -115,7 +118,11 @@ class Ui_MainWindow(object):
         self.textedit_users.setMaximumSize(QtCore.QSize(150, 16777215))
         self.textedit_users.setReadOnly(True)
         self.textedit_users.setObjectName(_fromUtf8("textedit_users"))
-        self.gridLayout.addWidget(self.textedit_users, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.textedit_users, 1, 1, 1, 1)
+        self.label_channel = QtGui.QLabel(self.verticalLayoutWidget)
+        self.label_channel.setText(_fromUtf8(""))
+        self.label_channel.setObjectName(_fromUtf8("label_channel"))
+        self.gridLayout.addWidget(self.label_channel, 0, 1, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout)
         self.horizontalLayout_7 = QtGui.QHBoxLayout()
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
@@ -154,20 +161,24 @@ class Ui_MainWindow(object):
         self.label_title.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\">PvPGN Login Info</span></p></body></html>", None))
         self.input_username.setPlaceholderText(_translate("MainWindow", "Username", None))
         self.input_password.setPlaceholderText(_translate("MainWindow", "Password", None))
+        self.input_server.setText(_translate("MainWindow", "server.war2.ru", None))
         self.input_server.setPlaceholderText(_translate("MainWindow", "Server", None))
+        self.input_channel.setText(_translate("MainWindow", "War2BNE", None))
         self.input_channel.setPlaceholderText(_translate("MainWindow", "Channel", None))
+        self.input_client_tag.setText(_translate("MainWindow", "W2BN", None))
+        self.input_client_tag.setPlaceholderText(_translate("MainWindow", "Game Tag", None))
         self.button_login.setText(_translate("MainWindow", "Login", None))
         self.label.setText(_translate("MainWindow", "<html><head/><body><p><img src=\":/warchatter/warchatter.png\"/></p></body></html>", None))
         self.button_logout.setText(_translate("MainWindow", "Logout", None))
         self.textedit_chat.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Droid Sans\'; font-size:12pt; font-weight:400; font-style:normal;\" bgcolor=\"#000000\">\n"
+"</style></head><body style=\" font-family:\'Droid Sans\'; font-size:9pt; font-weight:400; font-style:normal;\" bgcolor=\"#000000\">\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", None))
         self.textedit_users.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Droid Sans\'; font-size:12pt; font-weight:400; font-style:normal;\" bgcolor=\"#d3d3d3\">\n"
+"</style></head><body style=\" font-family:\'Droid Sans\'; font-size:9pt; font-weight:400; font-style:normal;\" bgcolor=\"#d3d3d3\">\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", None))
         self.button_send.setText(_translate("MainWindow", "Send", None))
 
