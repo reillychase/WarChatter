@@ -71,6 +71,8 @@ class chat_thread(QThread):
                 print data
                 print '--------------------------------------------------'
 
+                data_cleaned = re.findall('.+\n(Joining channel: .+)', data, flags=re.DOTALL)[0]
+                self.emit(SIGNAL('catch_textedit_chat(QString, QString)'), data_cleaned, 'white')
 
                 if "failed" in data:
                     self.connection_status = 0
@@ -174,6 +176,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.password = ''
         self.server = ''
         self.print_admins = 0
+        self.logged_on_admins = []
 
     def check_admins(self):
 
