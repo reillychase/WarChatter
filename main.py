@@ -349,10 +349,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
             if re.findall('^Joining channel: "(.+)"$', line):
                 self.list_users.clear()
-
-                self.users_in_chan[:] = []
                 self.channel_name = re.findall('^Joining channel: "(.+)"$', line)[0]
-                self.update_list_users()
                 print re.findall('^Joining channel: (.+)$', line)
 
                 if self.link_flag == 1:
@@ -379,32 +376,32 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
                 if 'is here' in user_status_msg[0]:
                     user = re.findall('^\[(.+) is here\]$', line)
-                    self.users_in_chan.append(user[0])
+                    self.list_users.addItem(user[0])
                     self.update_list_users()
 
                 elif 'enters' in user_status_msg[0]:
                     user = re.findall('^\[(.+) enters\]$', line)
-                    self.users_in_chan.append(user[0])
+                    self.list_users.addItem(user[0])
                     self.update_list_users()
 
                 elif 'quit' in user_status_msg[0]:
                     user = re.findall('^\[(.+) quit\]$', line)
-                    self.users_in_chan.remove(user[0])
+                    self.remove_from_user_list(user)
                     self.update_list_users()
 
                 elif 'leaves' in user_status_msg[0]:
                     user = re.findall('^\[(.+) leaves\]$', line)
-                    self.users_in_chan.remove(user[0])
+                    self.remove_from_user_list(user)
                     self.update_list_users()
 
                 elif 'kicked' in user_status_msg[0]:
                     user = re.findall('^\[(.+) has been kicked\]$', line)
-                    self.users_in_chan.remove(user[0])
+                    self.remove_from_user_list(user)
                     self.update_list_users()
 
                 elif 'banned' in user_status_msg[0]:
                     user = re.findall('^\[(.+) has been banned\]$', line)
-                    self.users_in_chan.remove(user[0])
+                    self.remove_from_user_list(user)
                     self.update_list_users()
 
             elif re.findall('^ERROR: ', line):
@@ -475,19 +472,23 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                         self.textedit_chat.append(str(line).decode('string_escape'))
 
             else:
-                self.textedit_chat.setStyleSheet('color: #ffff00')
                 if self.link_flag == 1:
-                    self.textedit_chat.append(str(self.line_w_links).decode('string_escape'))
+                    self.textedit_chat.append('<span style="color: #ffff00;">' + str(self.line_w_links).decode('string_escape') + '</span>')
 
                 else:
-                    self.textedit_chat.append(str(line).decode('string_escape'))
+                    self.textedit_chat.append('<span style="color: #ffff00;">' + str(line).decode('string_escape') + '</span>')
+
+    def remove_from_user_list(self, user):
+        user_count = self.list_users.count()
+        for i in range(user_count):
+            print self.list_users.item(i).text()
+            if user[0] == self.list_users.item(i).text():
+                self.list_users.takeItem(i)
+                break
 
     def update_list_users(self):
-        self.list_users.clear()
 
-        for user in self.users_in_chan:
-            self.list_users.addItem(user)
-        self.channel_user_count = len(self.users_in_chan)
+        self.channel_user_count = self.list_users.count()
         self.label_channel.setText(self.channel_name + ' (' + str(self.channel_user_count) + ')')
 
 
