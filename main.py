@@ -4,6 +4,7 @@ import time
 import socket
 import ui
 import re
+import threading
 from PyQt4.QtCore import QThread, SIGNAL
 
 class chat_thread(QThread):
@@ -66,7 +67,7 @@ class chat_thread(QThread):
                             break
                 data = ''.join(total_data)
 
-                print 'WarChat DEBUG: chat_thread.pvpgn_login() Output -----'
+                print 'WarChatter DEBUG: chat_thread.pvpgn_login() Output -----'
                 print data
                 print '--------------------------------------------------'
 
@@ -113,7 +114,7 @@ class chat_thread(QThread):
                     break
 
             except Exception as e:
-                print 'WarChat Debug: chat_thread.pvpgn_login Socket Error -----'
+                print 'WarChatter Debug: chat_thread.pvpgn_login Socket Error -----'
                 print e
                 print '--------------------------------------------------------'
                 self.emit(SIGNAL('catch_status_msg(QString, QString)'), 'No reply from server', 'red')
@@ -122,6 +123,7 @@ class chat_thread(QThread):
 
     def loop_chat_recv(self):
         if self.end_flag == 0:
+
             while True:
                 try:
 
@@ -158,6 +160,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.textedit_chat.setReadOnly(True)
         self.textedit_users.setReadOnly(True)
         self.users_in_chan = []
+        self.online_admins = []
         self.endflag = 0
         self.input_msg.returnPressed.connect(self.send_msg)
         self.input_msg_prefix.returnPressed.connect(self.send_msg)
@@ -170,6 +173,17 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.username = ''
         self.password = ''
         self.server = ''
+        self.print_admins = 0
+
+    def check_admins(self):
+
+        if self.endflag == 0:
+            self.get_thread.s.send("/admins")
+            self.get_thread.s.send("\r\n")
+            threading.Timer(60, self.check_admins).start()
+
+        else:
+            return
 
     def send_msg(self):
         print 'WarChatter.send_msg()'
@@ -180,10 +194,22 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
         if self.msg_prefix:
             self.msg = self.msg_prefix + ' ' + self.msg
+
         self.input_msg.setText('')
+
+        if re.findall('^/admins$', self.msg):
+            self.print_admins = 1
+            self.get_thread.s.send(self.msg)
+            self.get_thread.s.send("\r\n")
 
         if re.findall('^/stats$', self.msg):
             self.msg = self.msg + ' ' + self.username + ' ' + self.client_tag
+            print self.msg
+            self.get_thread.s.send(str(self.msg))
+            self.get_thread.s.send("\r\n")
+
+        elif re.findall('^/games$', self.msg):
+            self.msg = self.msg + ' ' + self.client_tag
             print self.msg
             self.get_thread.s.send(str(self.msg))
             self.get_thread.s.send("\r\n")
@@ -197,7 +223,6 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         elif re.findall('^/', self.msg):
             self.get_thread.s.send(self.msg)
             self.get_thread.s.send("\r\n")
-
 
         elif re.findall('(^https?)://(.+?)\..+', self.msg.lower()):
 
@@ -231,7 +256,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
             self.catch_textedit_chat_2(msg, 'white')
 
     def logout(self):
-
+        threading.Timer(3, self.check_admins).cancel()
         self.end_flag = 1
         self.users_in_chan = []
 
@@ -258,8 +283,6 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                                                "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
                                                None))
         self.label_status_msg.setText("")
-        self.label_status_msg.setStyleSheet('color: light gray')
-        self.textedit_chat.setStyleSheet('color: #ffff00')
         self.stackedWidget.setCurrentIndex(0)
 
 
@@ -293,6 +316,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.label_status_msg.setStyleSheet('color: light gray')
 
     def catch_login_success(self):
+        threading.Timer(3, self.check_admins).start()
         self.stackedWidget.setCurrentIndex(1)
 
     def catch_status_msg(self, msg, color):
@@ -303,7 +327,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.label_status_msg.setStyleSheet('color: ' + color)
 
     def catch_textedit_chat_2(self, msg, color):
-        self.textedit_chat.append(msg)
+        self.textedit_chat.append(str(msg).decode('string_escape'))
 
     def catch_textedit_chat(self, msg, color):
 
@@ -313,7 +337,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         msg = str(msg)
         msg = msg.splitlines()
         for line in msg:
-
+            line = line
             self.link_flag = 0
 
             if re.findall('https?://.+?\.', line.lower()):
@@ -348,12 +372,23 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                 self.update_textedit_users()
                 print re.findall('^Joining channel: (.+)$', line)
 
-                if self.link_flag == 0:
-                    line = '<span style="color: #00ef00;">' + line + '</span>'
-                    self.textedit_chat.append(line)
-                else:
+                if self.link_flag == 1:
                     line = '<span style="color: #00ef00;">' + self.line_w_links + '</span>'
                     self.textedit_chat.append(line)
+
+                else:
+                    line = '<span style="color: #00ef00;">' + line + '</span>'
+                    self.textedit_chat.append(line)
+
+            elif re.findall('^Currently logged on Administrators:', line):
+
+                self.logged_on_admins = re.findall('^Currently logged on Administrators: (.+)', line)[0]
+                self.logged_on_admins = self.logged_on_admins.split()
+
+
+                if self.print_admins == 1:
+                    self.textedit_chat.append(line)
+                    self.print_admins = 0
 
             elif re.findall('^\[(.+)\]$', line):
                 user_status_msg = re.findall('^\[(.+)\]$', line)
@@ -391,50 +426,76 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
             elif re.findall('^ERROR: ', line):
                 line = line.replace("ERROR: ", "", 1)
-                if self.link_flag == 0:
-                    line = '<span style="color: #ff0000;">' + line + '</span>'
-                    self.textedit_chat.append(line)
-                else:
+                if self.link_flag == 1:
                     line = '<span style="color: #ff0000;">' + self.line_w_links + '</span>'
-                    self.textedit_chat.append(line)
+                    self.textedit_chat.append(str(line).decode('string_escape'))
+                else:
+                    line = '<span style="color: #ff0000;">' + line + '</span>'
+                    self.textedit_chat.append(str(line).decode('string_escape'))
+
+            elif re.findall('^Connection closed.$', line):
+
+                pass
+
+            elif re.findall('^Connection closed.$', line):
+                pass
 
             elif re.findall('^<from (.+?)>', line):
                 username = re.findall('^<from (.+?)> ', line)[0]
-                if self.link_flag == 0:
-                    line = line.replace("from ", "From:", 1)
-                    line = '<span style="color: #ffff00;">&lt;From: ' + username + '&gt;</span><span style="color: gray;" > ' + line + '</span>'
-                    self.textedit_chat.append(line)
-                else:
+                if self.link_flag == 1:
+
                     line = self.line_w_links.replace("from ", "From:", 1)
                     line = '<span style="color: #ffff00;">&lt;From: ' + username + '&gt;</span><span style="color: gray;" > ' + line + '</span>'
-                    self.textedit_chat.append(line)
+                    self.textedit_chat.append(str(line).decode('string_escape'))
+
+                else:
+
+                    line = line.replace("from ", "From:", 1)
+                    line = '<span style="color: #ffff00;">&lt;From: ' + username + '&gt;</span><span style="color: gray;" > ' + line + '</span>'
+                    self.textedit_chat.append(str(line).decode('string_escape'))
 
             elif re.findall('^<to (.+?)>', line):
                 username = re.findall('^<to (.+?)> ', line)[0]
-                if self.link_flag == 0:
-                    line = line.replace("to ", "To:", 1)
-                    line = '<span style="color: #00ffff;">&lt;To: ' + username + '&gt;</span><span style="color: gray;" > ' + line + '</span>'
-                    self.textedit_chat.append(line)
-                else:
+                if self.link_flag == 1:
+
                     line = self.line_w_links.replace("to ", "To:", 1)
                     line = '<span style="color: #00ffff;">&lt;To: ' + username + '&gt;</span><span style="color: gray;" > ' + line + '</span>'
-                    self.textedit_chat.append(line)
+                    self.textedit_chat.append(str(line).decode('string_escape'))
+
+                else:
+
+                    line = line.replace("to ", "To:", 1)
+                    line = '<span style="color: #00ffff;">&lt;To: ' + username + '&gt;</span><span style="color: gray;" > ' + line + '</span>'
+                    self.textedit_chat.append(str(line).decode('string_escape'))
 
             elif re.findall('^<(.+?)> ', line):
                 username = re.findall('^<(.+?)> ', line)[0]
-                if self.link_flag == 0:
-                    line = '<span style="color: #ffff00;">&lt;' + username + '&gt;</span><span style="color: white;" > ' + line + '</span>'
-                    self.textedit_chat.append(line)
+                if username in self.logged_on_admins:
+
+                    if self.link_flag == 1:
+                        line = '<span style="color: #00ffff;">&lt;' + username + '&gt;</span><span style="color: #00ffff;" > ' + self.line_w_links + '</span>'
+                        self.textedit_chat.append(str(line).decode('string_escape'))
+
+                    else:
+                        line = '<span style="color: #00ffff;">&lt;' + username + '&gt;</span><span style="color: #00ffff;" > ' + line + '</span>'
+                        self.textedit_chat.append(str(line).decode('string_escape'))
                 else:
-                    line = '<span style="color: #ffff00;">&lt;' + username + '&gt;</span><span style="color: white;" > ' + self.line_w_links + '</span>'
-                    self.textedit_chat.append(line)
+
+                    if self.link_flag == 1:
+                        line = '<span style="color: #ffff00;">&lt;' + username + '&gt;</span><span style="color: white;" > ' + self.line_w_links + '</span>'
+                        self.textedit_chat.append(str(line).decode('string_escape'))
+
+                    else:
+                        line = '<span style="color: #ffff00;">&lt;' + username + '&gt;</span><span style="color: white;" > ' + line + '</span>'
+                        self.textedit_chat.append(str(line).decode('string_escape'))
 
             else:
                 self.textedit_chat.setStyleSheet('color: #ffff00')
-                if self.link_flag == 0:
-                    self.textedit_chat.append(line)
+                if self.link_flag == 1:
+                    self.textedit_chat.append(str(self.line_w_links).decode('string_escape'))
+
                 else:
-                    self.textedit_chat.append(self.line_w_links)
+                    self.textedit_chat.append(str(line).decode('string_escape'))
 
     def update_textedit_users(self):
         self.textedit_users.setText('')

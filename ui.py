@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'warchatter.ui'
 #
-# Created: Fri Oct 14 08:52:36 2016
+# Created: Fri Oct 14 10:59:57 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -59,6 +59,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_6.addWidget(self.input_username)
         self.input_password = QtGui.QLineEdit(self.verticalLayoutWidget_4)
         self.input_password.setInputMethodHints(QtCore.Qt.ImhHiddenText|QtCore.Qt.ImhNoAutoUppercase|QtCore.Qt.ImhNoPredictiveText)
+        self.input_password.setEchoMode(QtGui.QLineEdit.Password)
         self.input_password.setObjectName(_fromUtf8("input_password"))
         self.verticalLayout_6.addWidget(self.input_password)
         self.input_server = QtGui.QLineEdit(self.verticalLayoutWidget_4)
@@ -105,10 +106,6 @@ class Ui_MainWindow(object):
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.gridLayout = QtGui.QGridLayout()
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.textedit_chat = QtGui.QTextEdit(self.verticalLayoutWidget)
-        self.textedit_chat.setReadOnly(True)
-        self.textedit_chat.setObjectName(_fromUtf8("textedit_chat"))
-        self.gridLayout.addWidget(self.textedit_chat, 1, 0, 1, 1)
         self.textedit_users = QtGui.QTextEdit(self.verticalLayoutWidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -123,6 +120,11 @@ class Ui_MainWindow(object):
         self.label_channel.setText(_fromUtf8(""))
         self.label_channel.setObjectName(_fromUtf8("label_channel"))
         self.gridLayout.addWidget(self.label_channel, 0, 1, 1, 1)
+        self.textedit_chat = QtGui.QTextBrowser(self.verticalLayoutWidget)
+        self.textedit_chat.setAutoFillBackground(False)
+        self.textedit_chat.setOpenExternalLinks(True)
+        self.textedit_chat.setObjectName(_fromUtf8("textedit_chat"))
+        self.gridLayout.addWidget(self.textedit_chat, 1, 0, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout)
         self.horizontalLayout_7 = QtGui.QHBoxLayout()
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
@@ -170,15 +172,15 @@ class Ui_MainWindow(object):
         self.button_login.setText(_translate("MainWindow", "Login", None))
         self.label.setText(_translate("MainWindow", "<html><head/><body><p><img src=\":/warchatter/warchatter.png\"/></p></body></html>", None))
         self.button_logout.setText(_translate("MainWindow", "Logout", None))
-        self.textedit_chat.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Droid Sans\'; font-size:9pt; font-weight:400; font-style:normal;\" bgcolor=\"#000000\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", None))
         self.textedit_users.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:9pt; font-weight:400; font-style:normal;\" bgcolor=\"#d3d3d3\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", None))
+        self.textedit_chat.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Droid Sans\'; font-size:9pt; font-weight:400; font-style:normal;\" bgcolor=\"#000000\">\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", None))
         self.button_send.setText(_translate("MainWindow", "Send", None))
 
