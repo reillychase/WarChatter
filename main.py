@@ -71,9 +71,6 @@ class chat_thread(QThread):
                 print data
                 print '--------------------------------------------------'
 
-                data_cleaned = re.findall('.+\n(Joining channel: .+)', data, flags=re.DOTALL)[0]
-                self.emit(SIGNAL('catch_textedit_chat(QString, QString)'), data_cleaned, 'white')
-
                 if "failed" in data:
                     self.connection_status = 0
                     self.emit(SIGNAL('catch_status_msg(QString, QString)'), 'Login failed', 'red')
@@ -85,6 +82,8 @@ class chat_thread(QThread):
                     return
 
                 elif "Your unique name:" in data:
+                    data_cleaned = re.findall('.+\n(Joining channel: .+)', data, flags=re.DOTALL)[0]
+                    self.emit(SIGNAL('catch_textedit_chat(QString, QString)'), data_cleaned, 'white')
                     self.connection_status = 1
                     if self.channel:
                         if self.channel != "chat":
