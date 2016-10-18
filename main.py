@@ -156,15 +156,13 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.setupUi(self)  # This is defined in ui.py file automatically
         # It sets up layout and widgets that are defined
         self.button_login.clicked.connect(self.login)
-        self.button_logout.clicked.connect(self.logout)
+        self.button_quit.clicked.connect(self.logout)
         self.button_send.clicked.connect(self.send_msg)
         self.textedit_chat.setReadOnly(True)
-        self.textedit_users.setReadOnly(True)
         self.users_in_chan = []
         self.online_admins = []
         self.endflag = 0
         self.input_msg.returnPressed.connect(self.send_msg)
-        self.input_msg_prefix.returnPressed.connect(self.send_msg)
         self.input_username.returnPressed.connect(self.login)
         self.input_password.returnPressed.connect(self.login)
         self.input_server.returnPressed.connect(self.login)
@@ -191,11 +189,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         print 'WarChatter.send_msg()'
         # Gather and assign all the user input:
         self.username = self.input_username.text()
-        self.msg_prefix = str(self.input_msg_prefix.text())
         self.msg = str(self.input_msg.text())
-
-        if self.msg_prefix:
-            self.msg = self.msg_prefix + ' ' + self.msg
 
         self.input_msg.setText('')
 
@@ -276,14 +270,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                                               "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:12pt; font-weight:400; font-style:normal;\" bgcolor=\"#000000\">\n"
                                               "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
                                               None))
-        self.textedit_users.setText('')
-        self.textedit_users.setHtml(ui._translate("MainWindow",
-                                               "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-                                               "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-                                               "p, li { white-space: pre-wrap; }\n"
-                                               "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:12pt; font-weight:400; font-style:normal;\" bgcolor=\"#d3d3d3\">\n"
-                                               "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
-                                               None))
+        self.list_users.clear()
         self.label_status_msg.setText("")
         self.stackedWidget.setCurrentIndex(0)
 
@@ -361,17 +348,11 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
 
             if re.findall('^Joining channel: "(.+)"$', line):
-                self.textedit_users.setText('')
-                self.textedit_users.setHtml(ui._translate("MainWindow",
-                                                          "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-                                                          "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-                                                          "p, li { white-space: pre-wrap; }\n"
-                                                          "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:12pt; font-weight:400; font-style:normal;\" bgcolor=\"#d3d3d3\">\n"
-                                                          "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
-                                                          None))
+                self.list_users.clear()
+
                 self.users_in_chan[:] = []
                 self.channel_name = re.findall('^Joining channel: "(.+)"$', line)[0]
-                self.update_textedit_users()
+                self.update_list_users()
                 print re.findall('^Joining channel: (.+)$', line)
 
                 if self.link_flag == 1:
@@ -399,32 +380,32 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                 if 'is here' in user_status_msg[0]:
                     user = re.findall('^\[(.+) is here\]$', line)
                     self.users_in_chan.append(user[0])
-                    self.update_textedit_users()
+                    self.update_list_users()
 
                 elif 'enters' in user_status_msg[0]:
                     user = re.findall('^\[(.+) enters\]$', line)
                     self.users_in_chan.append(user[0])
-                    self.update_textedit_users()
+                    self.update_list_users()
 
                 elif 'quit' in user_status_msg[0]:
                     user = re.findall('^\[(.+) quit\]$', line)
                     self.users_in_chan.remove(user[0])
-                    self.update_textedit_users()
+                    self.update_list_users()
 
                 elif 'leaves' in user_status_msg[0]:
                     user = re.findall('^\[(.+) leaves\]$', line)
                     self.users_in_chan.remove(user[0])
-                    self.update_textedit_users()
+                    self.update_list_users()
 
                 elif 'kicked' in user_status_msg[0]:
                     user = re.findall('^\[(.+) has been kicked\]$', line)
                     self.users_in_chan.remove(user[0])
-                    self.update_textedit_users()
+                    self.update_list_users()
 
                 elif 'banned' in user_status_msg[0]:
                     user = re.findall('^\[(.+) has been banned\]$', line)
                     self.users_in_chan.remove(user[0])
-                    self.update_textedit_users()
+                    self.update_list_users()
 
             elif re.findall('^ERROR: ', line):
                 line = line.replace("ERROR: ", "", 1)
@@ -475,10 +456,12 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                 if username in self.logged_on_admins:
 
                     if self.link_flag == 1:
+
                         line = '<span style="color: #00ffff;">&lt;' + username + '&gt;</span><span style="color: #00ffff;" > ' + self.line_w_links + '</span>'
                         self.textedit_chat.append(str(line).decode('string_escape'))
 
                     else:
+
                         line = '<span style="color: #00ffff;">&lt;' + username + '&gt;</span><span style="color: #00ffff;" > ' + line + '</span>'
                         self.textedit_chat.append(str(line).decode('string_escape'))
                 else:
@@ -499,17 +482,11 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                 else:
                     self.textedit_chat.append(str(line).decode('string_escape'))
 
-    def update_textedit_users(self):
-        self.textedit_users.setText('')
-        self.textedit_users.setHtml(ui._translate("MainWindow",
-                                               "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-                                               "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-                                               "p, li { white-space: pre-wrap; }\n"
-                                               "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:12pt; font-weight:400; font-style:normal;\" bgcolor=\"#d3d3d3\">\n"
-                                               "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
-                                               None))
+    def update_list_users(self):
+        self.list_users.clear()
+
         for user in self.users_in_chan:
-            self.textedit_users.append(user)
+            self.list_users.addItem(user)
         self.channel_user_count = len(self.users_in_chan)
         self.label_channel.setText(self.channel_name + ' (' + str(self.channel_user_count) + ')')
 
