@@ -159,7 +159,6 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.button_quit.clicked.connect(self.logout)
         self.button_send.clicked.connect(self.send_msg)
         self.textedit_chat.setReadOnly(True)
-        self.users_in_chan = []
         self.online_admins = []
         self.endflag = 0
         self.input_msg.returnPressed.connect(self.send_msg)
@@ -254,7 +253,6 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
     def logout(self):
         threading.Timer(3, self.check_admins).cancel()
         self.end_flag = 1
-        self.users_in_chan = []
 
         self.get_thread.s.send("/logout")
         self.get_thread.s.send("\r\n")
@@ -271,6 +269,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                                               "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
                                               None))
         self.list_users.clear()
+        self.logged_on_admins = []
         self.label_status_msg.setText("")
         self.stackedWidget.setCurrentIndex(0)
 
