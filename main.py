@@ -159,6 +159,12 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.button_quit.clicked.connect(self.logout)
         self.button_send.clicked.connect(self.send_msg)
         self.button_whisper.clicked.connect(self.send_whisper)
+        self.list_users.itemDoubleClicked.connect(self.open_profile)
+        self.button_cancel_profile.clicked.connect(self.back_to_chat)
+        self.button_cancel_channels.clicked.connect(self.back_to_chat)
+        self.button_cancel_games.clicked.connect(self.back_to_chat)
+        self.button_join.clicked.connect(self.open_games)
+        self.button_channel.clicked.connect(self.open_channels)
         self.textedit_chat.setReadOnly(True)
         self.online_admins = []
         self.endflag = 0
@@ -174,6 +180,18 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.server = ''
         self.print_admins = 0
         self.logged_on_admins = []
+
+    def open_games(self):
+        self.stackedWidget.setCurrentIndex(2)
+
+    def open_channels(self):
+        self.stackedWidget.setCurrentIndex(4)
+
+    def open_profile(self):
+        self.stackedWidget.setCurrentIndex(3)
+
+    def back_to_chat(self):
+        self.stackedWidget.setCurrentIndex(1)
 
     def check_admins(self):
 
