@@ -158,6 +158,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.button_login.clicked.connect(self.login)
         self.button_quit.clicked.connect(self.logout)
         self.button_send.clicked.connect(self.send_msg)
+        self.button_whisper.clicked.connect(self.send_whisper)
         self.textedit_chat.setReadOnly(True)
         self.online_admins = []
         self.endflag = 0
@@ -183,6 +184,46 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
         else:
             return
+
+    def send_whisper(self):
+        print 'WarChatter.send_whisper()'
+        self.username = self.input_username.text()
+        self.msg = str(self.input_msg.text())
+        self.whisper_user = self.list_users.currentItem().text()
+        self.msg = '/m ' + str(self.whisper_user) + ' ' + self.msg
+        self.input_msg.setText('')
+
+        if re.findall('(^https?)://(.+?)\..+', self.msg.lower()):
+
+            self.get_thread.s.send(self.msg)
+            self.get_thread.s.send("\r\n")
+
+            word_list = []
+            msg_words = self.msg.split()
+            for word in msg_words:
+                word_lower = word.lower()
+                if re.findall('^https?://.+?\..+', word_lower):
+                    link_parts = re.findall('^(https?://.+)', word_lower)
+                    link = link_parts[0]
+                    link = '<a href="' + link + '">' + link + '</a>'
+                    word_list.append(link)
+                else:
+                    word_list.append(word)
+
+            self.msg = ' '.join(word_list)
+
+            print self.msg
+
+            msg = '<span style="color: #00ffff;">&lt;' + self.username + '&gt;</span><span style="color: white;" > ' + self.msg + '</span>'
+
+
+
+        else:
+            self.get_thread.s.send(self.msg)
+            self.get_thread.s.send("\r\n")
+            msg = '<span style="color: #00ffff;">&lt;' + self.username + '&gt;</span><span style="color: white;" > ' + self.msg + '</span>'
+
+
 
     def send_msg(self):
         print 'WarChatter.send_msg()'
