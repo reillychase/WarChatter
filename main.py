@@ -160,8 +160,10 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.button_send.clicked.connect(self.send_msg)
         self.button_whisper.clicked.connect(self.send_whisper)
         self.list_users.itemDoubleClicked.connect(self.open_profile)
+        self.list_channels.itemClicked.connect(self.update_channel)
+        self.list_channels.itemDoubleClicked.connect(self.open_channel)
         self.button_cancel_profile.clicked.connect(self.back_to_chat)
-        self.button_cancel_channels.clicked.connect(self.back_to_chat)
+        self.button_cancel_channel.clicked.connect(self.back_to_chat)
         self.button_cancel_games.clicked.connect(self.back_to_chat)
         self.button_join.clicked.connect(self.open_games)
         self.button_channel.clicked.connect(self.open_channels)
@@ -170,6 +172,8 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.endflag = 0
         self.input_msg.returnPressed.connect(self.send_msg)
         self.input_username.returnPressed.connect(self.login)
+        self.input_channel_2.returnPressed.connect(self.go_to_channel)
+        self.button_ok_channel.clicked.connect(self.go_to_channel)
         self.input_password.returnPressed.connect(self.login)
         self.input_server.returnPressed.connect(self.login)
         self.input_channel.returnPressed.connect(self.login)
@@ -180,11 +184,66 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.server = ''
         self.print_admins = 0
         self.logged_on_admins = []
+        self.channels = []
+        self.print_channels = 0
+        self.first_time_check_channels = 0
+
+    def update_channel(self):
+        self.input_channel_2.setText(self.list_channels.currentItem().text())
+
+    def go_to_channel(self):
+        print 'go.to.channel()'
+
+        channel = self.input_channel_2.text()
+        if channel != '':
+            print channel
+            self.msg = '/join ' + channel
+            if str(self.channel_name).lower() == str(channel).lower():
+                self.stackedWidget.setCurrentIndex(1)
+
+            else:
+                self.textedit_chat.setText('')
+                self.textedit_chat.setHtml(ui._translate("MainWindow",
+                                                         "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                                         "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                                         "p, li { white-space: pre-wrap; }\n"
+                                                         "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:12pt; font-weight:400; font-style:normal;\" bgcolor=\"#000000\">\n"
+                                                         "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
+                                                         None))
+                self.msg = '/join ' + channel
+                self.get_thread.s.send(str(self.msg))
+                self.get_thread.s.send("\r\n")
+                self.stackedWidget.setCurrentIndex(1)
+
+    def open_channel(self):
+        if str(self.channel_name).lower() == str(self.list_channels.currentItem().text()).lower():
+            self.stackedWidget.setCurrentIndex(1)
+
+        else:
+            self.textedit_chat.setText('')
+            self.textedit_chat.setHtml(ui._translate("MainWindow",
+                                                     "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                                     "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                                     "p, li { white-space: pre-wrap; }\n"
+                                                     "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:12pt; font-weight:400; font-style:normal;\" bgcolor=\"#000000\">\n"
+                                                     "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
+                                                     None))
+            channel = self.list_channels.currentItem().text()
+            self.msg = '/join ' + channel
+            self.get_thread.s.send(str(self.msg))
+            self.get_thread.s.send("\r\n")
+            self.stackedWidget.setCurrentIndex(1)
 
     def open_games(self):
         self.stackedWidget.setCurrentIndex(2)
 
     def open_channels(self):
+
+        if self.first_time_check_channels == 0:
+            self.msg = '/channels w2bn'
+            self.get_thread.s.send(str(self.msg))
+            self.get_thread.s.send("\r\n")
+            self.first_time_check_channels = 1
         self.stackedWidget.setCurrentIndex(4)
 
     def open_profile(self):
@@ -251,12 +310,31 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
         self.input_msg.setText('')
 
-        if re.findall('^/admins$', self.msg):
+        if re.findall('^/channels$', self.msg):
+            self.print_channels = 1
+            self.msg = self.msg + ' ' + self.client_tag
+            print self.msg
+            self.get_thread.s.send(str(self.msg))
+            self.get_thread.s.send("\r\n")
+
+        elif re.findall('^/join', self.msg):
+            self.textedit_chat.setText('')
+            self.textedit_chat.setHtml(ui._translate("MainWindow",
+                                                     "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                                     "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                                     "p, li { white-space: pre-wrap; }\n"
+                                                     "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:12pt; font-weight:400; font-style:normal;\" bgcolor=\"#000000\">\n"
+                                                     "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
+                                                     None))
+            self.get_thread.s.send(self.msg)
+            self.get_thread.s.send("\r\n")
+
+        elif re.findall('^/admins$', self.msg):
             self.print_admins = 1
             self.get_thread.s.send(self.msg)
             self.get_thread.s.send("\r\n")
 
-        if re.findall('^/stats$', self.msg):
+        elif re.findall('^/stats$', self.msg):
             self.msg = self.msg + ' ' + self.username + ' ' + self.client_tag
             print self.msg
             self.get_thread.s.send(str(self.msg))
@@ -382,9 +460,32 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
         # This is where all the chatroom data styling and filtering takes place
         msg = str(msg)
+
+        if re.findall('^ -----------name----------- users ----admin/operator----', msg):
+            self.list_channels.clear()
+            self.channels = []
+            msg_2 = msg.splitlines()
+            for line in msg_2:
+
+                if re.findall('^ (.+) .?.?.?.?.?.?.?.?.? -', line):
+
+                    self.channels.append(re.findall('^ (.+) .?.?.?.?.?.?.?.?.? -', line)[0].strip())
+
+                    if self.print_channels == 1:
+                        line = '<span style="color: #ffff00;">' + line + '</span>'
+                        self.textedit_chat.append(str(line).decode('string_escape'))
+
+            self.channels.pop(0)
+            for channel in self.channels:
+                self.list_channels.addItem(channel)
+            print self.channels
+            self.input_channel_2.setText(self.channels[0])
+
+            return
+
         msg = msg.splitlines()
         for line in msg:
-            line = line
+
             self.link_flag = 0
 
             if re.findall('https?://.+?\.', line.lower()):
@@ -419,13 +520,16 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                     self.textedit_chat.append(line)
 
             elif re.findall('^Currently logged on Administrators:', line):
-
-                self.logged_on_admins = re.findall('^Currently logged on Administrators: (.+)', line)[0]
-                self.logged_on_admins = self.logged_on_admins.split()
+                try:
+                    self.logged_on_admins = re.findall('^Currently logged on Administrators: (.+)', line)[0]
+                    self.logged_on_admins = self.logged_on_admins.split()
+                except:
+                    pass
 
 
                 if self.print_admins == 1:
-                    self.textedit_chat.append(line)
+                    line = '<span style="color: #ffff00;">' + line + '</span>'
+                    self.textedit_chat.append(line.decode('string_escape'))
                     self.print_admins = 0
 
             elif re.findall('^\[(.+)\]$', line):
@@ -461,6 +565,11 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                     user = re.findall('^\[(.+) has been banned\]$', line)
                     self.remove_from_user_list(user)
                     self.update_list_users()
+
+            elif re.findall('^Current channels of type', line):
+                if self.print_channels == 1:
+                    line = '<span style="color: #ffff00;">' + line + '</span>'
+                    self.textedit_chat.append(str(line).decode('string_escape'))
 
             elif re.findall('^ERROR: ', line):
                 line = line.replace("ERROR: ", "", 1)
