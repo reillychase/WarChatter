@@ -189,6 +189,12 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.print_channels = 0
         self.first_time_check_channels = 0
         self.print_games = 0
+        self.profile_name = ''
+        self.profile_sex = ''
+        self.profile_age = ''
+        self.profile_location = ''
+        self.profile_description = ''
+        self.profile_stats = ''
 
     def update_channel(self):
         self.input_channel_2.setText(self.list_channels.currentItem().text())
@@ -236,6 +242,20 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.stackedWidget.setCurrentIndex(4)
 
     def open_profile(self):
+        self.profile_name = ''
+        self.profile_sex = ''
+        self.profile_age = ''
+        self.profile_location = ''
+        self.profile_description = ''
+        self.profile_stats = ''
+        user = self.list_users.currentItem().text()
+        print "/finger " + str(user) + ' ' + self.client_tag
+        self.get_thread.s.send("/finger " + str(user) + " " + str(self.client_tag))
+        self.get_thread.s.send("\r\n")
+        time.sleep(1)
+        print "/stats " + str(user) + " " + self.client_tag
+        self.get_thread.s.send("/stats " + str(user) + " " + str(self.client_tag))
+        self.get_thread.s.send("\r\n")
         self.stackedWidget.setCurrentIndex(3)
 
     def back_to_chat(self):
@@ -308,6 +328,13 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
             self.get_thread.s.send("\r\n")
 
         elif re.findall('^/join', self.msg):
+            self.get_thread.s.send(self.msg)
+            self.get_thread.s.send("\r\n")
+
+        elif re.findall('^/finger', self.msg):
+            self.print_finger = 1
+            self.msg = self.msg + ' ' + self.client_tag
+            print self.msg
             self.get_thread.s.send(self.msg)
             self.get_thread.s.send("\r\n")
 
@@ -496,6 +523,10 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         for line in msg:
 
             self.link_flag = 0
+
+            if re.findall('^Login: (.+) #.+? Sex: (.+?)\n', line):
+                self.profile_name = re.findall('^Login: (.+) #.+? Sex: (.+?)\n', line)[0]
+                self.profile_sex = re.findall('^Login: (.+) #.+? Sex: (.+?)\n', line)[1]
 
             if re.findall('https?://.+?\.', line.lower()):
 
