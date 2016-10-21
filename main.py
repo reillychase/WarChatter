@@ -239,6 +239,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.stackedWidget.setCurrentIndex(3)
 
     def back_to_chat(self):
+        self.list_games.clear()
         self.stackedWidget.setCurrentIndex(1)
 
     def check_admins(self):
@@ -338,7 +339,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
             self.get_thread.s.send(self.msg)
             self.get_thread.s.send("\r\n")
 
-        elif re.findall('(^https?)://(.+?)\..+', self.msg.lower()):
+        elif re.findall('(https?)://(.+?)\..+', self.msg.lower()):
 
             self.get_thread.s.send(self.msg)
             self.get_thread.s.send("\r\n")
