@@ -185,8 +185,10 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.print_admins = 0
         self.logged_on_admins = []
         self.channels = []
+        self.games = []
         self.print_channels = 0
         self.first_time_check_channels = 0
+        self.print_games = 0
 
     def update_channel(self):
         self.input_channel_2.setText(self.list_channels.currentItem().text())
@@ -202,14 +204,6 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                 self.stackedWidget.setCurrentIndex(1)
 
             else:
-                self.textedit_chat.setText('')
-                self.textedit_chat.setHtml(ui._translate("MainWindow",
-                                                         "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-                                                         "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-                                                         "p, li { white-space: pre-wrap; }\n"
-                                                         "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:12pt; font-weight:400; font-style:normal;\" bgcolor=\"#000000\">\n"
-                                                         "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
-                                                         None))
                 self.msg = '/join ' + channel
                 self.get_thread.s.send(str(self.msg))
                 self.get_thread.s.send("\r\n")
@@ -220,14 +214,6 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
             self.stackedWidget.setCurrentIndex(1)
 
         else:
-            self.textedit_chat.setText('')
-            self.textedit_chat.setHtml(ui._translate("MainWindow",
-                                                     "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-                                                     "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-                                                     "p, li { white-space: pre-wrap; }\n"
-                                                     "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:12pt; font-weight:400; font-style:normal;\" bgcolor=\"#000000\">\n"
-                                                     "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
-                                                     None))
             channel = self.list_channels.currentItem().text()
             self.msg = '/join ' + channel
             self.get_thread.s.send(str(self.msg))
@@ -235,6 +221,9 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
             self.stackedWidget.setCurrentIndex(1)
 
     def open_games(self):
+        self.msg = '/games ' + self.client_tag
+        self.get_thread.s.send(str(self.msg))
+        self.get_thread.s.send("\r\n")
         self.stackedWidget.setCurrentIndex(2)
 
     def open_channels(self):
@@ -318,14 +307,6 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
             self.get_thread.s.send("\r\n")
 
         elif re.findall('^/join', self.msg):
-            self.textedit_chat.setText('')
-            self.textedit_chat.setHtml(ui._translate("MainWindow",
-                                                     "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-                                                     "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-                                                     "p, li { white-space: pre-wrap; }\n"
-                                                     "</style></head><body style=\" font-family:\'Droid Sans\'; font-size:12pt; font-weight:400; font-style:normal;\" bgcolor=\"#000000\">\n"
-                                                     "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>",
-                                                     None))
             self.get_thread.s.send(self.msg)
             self.get_thread.s.send("\r\n")
 
@@ -342,6 +323,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
         elif re.findall('^/games$', self.msg):
             self.msg = self.msg + ' ' + self.client_tag
+            self.print_games = 1
             print self.msg
             self.get_thread.s.send(str(self.msg))
             self.get_thread.s.send("\r\n")
@@ -483,6 +465,32 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
             return
 
+        if re.findall('^ ------name------ p -status- --------type--------- count', msg):
+            self.list_games.clear()
+            self.games = []
+
+            msg_2 = msg.splitlines()
+
+            for line in msg_2:
+
+
+                if re.findall('^\s(.+?)\s.\s', line):
+
+                    if 'open' in line:
+                        self.games.append(re.findall('^\s(.+?)\s.\s', line)[0].strip())
+                        game = re.findall('^\s(.+?)\s.\s', line)[0].strip()
+                        print game
+
+                    if self.print_games == 1:
+                        line = '<span style="color: #ffff00;">' + line + '</span>'
+                        self.textedit_chat.append(str(line).decode('string_escape'))
+
+            for game in self.games:
+                self.list_games.addItem(game)
+            print self.games
+            self.print_games = 0
+            return
+
         msg = msg.splitlines()
         for line in msg:
 
@@ -568,6 +576,11 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
             elif re.findall('^Current channels of type', line):
                 if self.print_channels == 1:
+                    line = '<span style="color: #ffff00;">' + line + '</span>'
+                    self.textedit_chat.append(str(line).decode('string_escape'))
+
+            elif re.findall('^Current games of type', line):
+                if self.print_games == 1:
                     line = '<span style="color: #ffff00;">' + line + '</span>'
                     self.textedit_chat.append(str(line).decode('string_escape'))
 

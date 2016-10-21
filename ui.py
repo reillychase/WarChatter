@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'warchatter.ui'
 #
-# Created: Thu Oct 20 15:00:34 2016
+# Created: Thu Oct 20 16:37:59 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -422,9 +422,9 @@ class Ui_MainWindow(object):
         self.button_ok_channel = QtGui.QPushButton(self.verticalLayoutWidget_2)
         self.button_ok_channel.setObjectName(_fromUtf8("button_ok_channel"))
         self.horizontalLayout_18.addWidget(self.button_ok_channel)
-        self.button_cancel_channels = QtGui.QPushButton(self.verticalLayoutWidget_2)
-        self.button_cancel_channels.setObjectName(_fromUtf8("button_cancel_channels"))
-        self.horizontalLayout_18.addWidget(self.button_cancel_channels)
+        self.button_cancel_channel = QtGui.QPushButton(self.verticalLayoutWidget_2)
+        self.button_cancel_channel.setObjectName(_fromUtf8("button_cancel_channel"))
+        self.horizontalLayout_18.addWidget(self.button_cancel_channel)
         self.verticalLayout_2.addLayout(self.horizontalLayout_18)
         self.stackedWidget.addWidget(self.page_channels)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -491,10 +491,10 @@ class Ui_MainWindow(object):
         self.button_cancel_profile.setText(_translate("MainWindow", "Cancel", None))
         self.label_warchatter_2.setText(_translate("MainWindow", "<html><head/><body><p><img src=\":/warchatter/warchatter.png\"/></p></body></html>", None))
         self.label_9.setText(_translate("MainWindow", "Channels", None))
-        self.label_10.setText(_translate("MainWindow", "Select Chanel", None))
+        self.label_10.setText(_translate("MainWindow", "Select Channel", None))
         self.label_11.setText(_translate("MainWindow", "To join or create a Private Channel, enter a name below.", None))
         self.label_12.setText(_translate("MainWindow", "Channel: ", None))
         self.button_ok_channel.setText(_translate("MainWindow", "Ok", None))
-        self.button_cancel_channels.setText(_translate("MainWindow", "Cancel", None))
+        self.button_cancel_channel.setText(_translate("MainWindow", "Cancel", None))
 
 import resources_rc

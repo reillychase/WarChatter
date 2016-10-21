@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>4</number>
     </property>
     <widget class="QWidget" name="page_login">
      <widget class="QWidget" name="verticalLayoutWidget_4">
@@ -852,7 +852,7 @@ p, li { white-space: pre-wrap; }
            <item>
             <widget class="QLabel" name="label_10">
              <property name="text">
-              <string>Select Chanel</string>
+              <string>Select Channel</string>
              </property>
             </widget>
            </item>
@@ -930,7 +930,7 @@ p, li { white-space: pre-wrap; }
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="button_cancel_channels">
+          <widget class="QPushButton" name="button_cancel_channel">
            <property name="text">
             <string>Cancel</string>
            </property>
