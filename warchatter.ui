@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="page_login">
      <widget class="QWidget" name="verticalLayoutWidget_4">
@@ -587,7 +587,7 @@ p, li { white-space: pre-wrap; }
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_15">
              <item>
-              <widget class="QTextEdit" name="texredit_name">
+              <widget class="QTextEdit" name="textedit_name">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                  <horstretch>0</horstretch>

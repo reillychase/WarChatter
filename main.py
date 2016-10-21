@@ -195,6 +195,8 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.profile_location = ''
         self.profile_description = ''
         self.profile_stats = ''
+        self.print_finger = 0
+        self.print_stats = 0
 
     def update_channel(self):
         self.input_channel_2.setText(self.list_channels.currentItem().text())
@@ -242,12 +244,19 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.stackedWidget.setCurrentIndex(4)
 
     def open_profile(self):
+        self.textedit_name.setText('')
+        self.textedit_age.setText('')
+        self.textedit_sex.setText('')
+        self.textedit_location.setText('')
+        self.textedit_description.setText('')
+        self.textedit_stats.setText('')
         self.profile_name = ''
         self.profile_sex = ''
         self.profile_age = ''
         self.profile_location = ''
         self.profile_description = ''
         self.profile_stats = ''
+
         user = self.list_users.currentItem().text()
         print "/finger " + str(user) + ' ' + self.client_tag
         self.get_thread.s.send("/finger " + str(user) + " " + str(self.client_tag))
@@ -332,8 +341,9 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
             self.get_thread.s.send("\r\n")
 
         elif re.findall('^/finger', self.msg):
-            self.print_finger = 1
-            self.msg = self.msg + ' ' + self.client_tag
+
+            print 'set finger to 1'
+            self.msg = self.msg + ' ' + str(self.client_tag)
             print self.msg
             self.get_thread.s.send(self.msg)
             self.get_thread.s.send("\r\n")
@@ -519,14 +529,53 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
             self.print_games = 0
             return
 
+        if re.findall('^Created:', msg):
+            list_profile_description = []
+            self.list_games.clear()
+            self.games = []
+
+            msg_2 = msg.splitlines()
+
+            for line in msg_2:
+
+
+                if re.findall('^Created:', line):
+                    continue
+
+                elif re.findall('^Login:', line):
+                    continue
+
+                elif re.findall('^Location:', line):
+                    continue
+
+                elif re.findall('^Client:', line):
+                    continue
+
+                elif re.findall('^On since', line):
+                    continue
+
+                elif re.findall('^Idle', line):
+                    continue
+
+                else:
+                    list_profile_description.append(line)
+
+            self.profile_description = '\n'.join(list_profile_description).decode('string_escape')
+            self.textedit_description.setText(self.profile_description)
+            print '-- prof desc! ----'
+            print self.profile_description
+            print '---- done prof desc ---'
+
+
+            for game in self.games:
+                self.list_games.addItem(game)
+            print self.games
+            self.print_games = 0
+
         msg = msg.splitlines()
         for line in msg:
 
             self.link_flag = 0
-
-            if re.findall('^Login: (.+) #.+? Sex: (.+?)\n', line):
-                self.profile_name = re.findall('^Login: (.+) #.+? Sex: (.+?)\n', line)[0]
-                self.profile_sex = re.findall('^Login: (.+) #.+? Sex: (.+?)\n', line)[1]
 
             if re.findall('https?://.+?\.', line.lower()):
 
@@ -558,6 +607,52 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                 else:
                     line = '<span style="color: #00ef00;">' + line + '</span>'
                     self.textedit_chat.append(line)
+
+            elif re.findall('^Login: (.+) #.+? Sex:', line):
+                self.profile_name = re.findall('^Login: (.+) #.+? Sex: (.+)', line)[0][0].decode('string_escape')
+                self.textedit_name.setText(self.profile_name)
+                self.profile_sex = re.findall('^Login: (.+) #.+? Sex: (.+)', line)[0][1].decode('string_escape')
+                self.textedit_sex.setText(self.profile_sex)
+                if self.print_finger == 1:
+                    print 'yes print finger !!!'
+                    line = '<span style="color: #ffff00;">' + line + '</span>'
+                    self.textedit_chat.append(line.decode('string_escape'))
+                else:
+                    continue
+
+            elif re.findall('^Created: (.+?)', line):
+
+                if self.print_finger == 1:
+                    print 'yes print finger !!!'
+                    line = '<span style="color: #ffff00;">' + line + '</span>'
+                    self.textedit_chat.append(line.decode('string_escape'))
+
+                else:
+                    continue
+
+            elif re.findall('^Clan: (.+) Rank: (.+?)', line):
+
+                if self.print_finger == 1:
+                    line = '<span style="color: #ffff00;">' + line + '</span>'
+                    self.textedit_chat.append(line.decode('string_escape'))
+
+                else:
+                    continue
+
+            elif re.findall('^Location: (.+?) Age:', line):
+
+                self.profile_location = re.findall('^Location: (.+?) Age: (.+)', line)[0][0]
+
+                self.textedit_location.setText(self.profile_location)
+                self.profile_age = re.findall('^Location: (.+?) Age: (.+)', line)[0][1]
+                self.textedit_age.setText(self.profile_age)
+                if self.print_finger == 1:
+                    print 'yes print finger !!!'
+                    line = '<span style="color: #ffff00;">' + line + '</span>'
+                    self.textedit_chat.append(line.decode('string_escape'))
+
+                else:
+                    continue
 
             elif re.findall('^Currently logged on Administrators:', line):
                 try:
@@ -689,6 +784,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
                 else:
                     self.textedit_chat.append('<span style="color: #ffff00;">' + str(line).decode('string_escape') + '</span>')
+
 
     def remove_from_user_list(self, user):
         user_count = self.list_users.count()

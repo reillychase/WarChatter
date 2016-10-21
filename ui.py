@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'warchatter.ui'
 #
-# Created: Thu Oct 20 16:37:59 2016
+# Created: Fri Oct 21 16:53:19 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -273,16 +273,16 @@ class Ui_MainWindow(object):
         self.verticalLayout_13.addLayout(self.horizontalLayout_11)
         self.horizontalLayout_15 = QtGui.QHBoxLayout()
         self.horizontalLayout_15.setObjectName(_fromUtf8("horizontalLayout_15"))
-        self.texredit_name = QtGui.QTextEdit(self.verticalLayoutWidget_5)
+        self.textedit_name = QtGui.QTextEdit(self.verticalLayoutWidget_5)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.texredit_name.sizePolicy().hasHeightForWidth())
-        self.texredit_name.setSizePolicy(sizePolicy)
-        self.texredit_name.setMaximumSize(QtCore.QSize(200, 25))
-        self.texredit_name.setReadOnly(True)
-        self.texredit_name.setObjectName(_fromUtf8("texredit_name"))
-        self.horizontalLayout_15.addWidget(self.texredit_name)
+        sizePolicy.setHeightForWidth(self.textedit_name.sizePolicy().hasHeightForWidth())
+        self.textedit_name.setSizePolicy(sizePolicy)
+        self.textedit_name.setMaximumSize(QtCore.QSize(200, 25))
+        self.textedit_name.setReadOnly(True)
+        self.textedit_name.setObjectName(_fromUtf8("textedit_name"))
+        self.horizontalLayout_15.addWidget(self.textedit_name)
         spacerItem8 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_15.addItem(spacerItem8)
         self.textedit_sex = QtGui.QTextEdit(self.verticalLayoutWidget_5)
