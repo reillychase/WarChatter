@@ -261,7 +261,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         print "/finger " + str(user) + ' ' + self.client_tag
         self.get_thread.s.send("/finger " + str(user) + " " + str(self.client_tag))
         self.get_thread.s.send("\r\n")
-        time.sleep(1)
+        time.sleep(.25)
         print "/stats " + str(user) + " " + self.client_tag
         self.get_thread.s.send("/stats " + str(user) + " " + str(self.client_tag))
         self.get_thread.s.send("\r\n")
@@ -557,6 +557,14 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                 elif re.findall('^Idle', line):
                     continue
 
+                # PvPGN typo
+                elif re.findall('^Clan : ', line):
+                    continue
+
+                # Incase PvPGN fixes typo
+                elif re.findall('^Clan: ', line):
+                    continue
+
                 else:
                     list_profile_description.append(line)
 
@@ -609,10 +617,11 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                     self.textedit_chat.append(line)
 
             elif re.findall('^Login: (.+) #.+? Sex:', line):
-                self.profile_name = re.findall('^Login: (.+) #.+? Sex: (.+)', line)[0][0].decode('string_escape')
+                self.profile_name = re.findall('^Login: (.+) #.+? Sex:', line)[0].decode('string_escape')
                 self.textedit_name.setText(self.profile_name)
-                self.profile_sex = re.findall('^Login: (.+) #.+? Sex: (.+)', line)[0][1].decode('string_escape')
-                self.textedit_sex.setText(self.profile_sex)
+                if re.findall('^Login: (.+) #.+? Sex: (.+)', line):
+                    self.profile_sex = re.findall('^Login: (.+) #.+? Sex: (.+)', line)[0][1].decode('string_escape')
+                    self.textedit_sex.setText(self.profile_sex)
                 if self.print_finger == 1:
                     print 'yes print finger !!!'
                     line = '<span style="color: #ffff00;">' + line + '</span>'
@@ -641,11 +650,12 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
             elif re.findall('^Location: (.+?) Age:', line):
 
-                self.profile_location = re.findall('^Location: (.+?) Age: (.+)', line)[0][0]
+                self.profile_location = re.findall('^Location: (.+?) Age:', line)[0].decode('string_escape')
 
                 self.textedit_location.setText(self.profile_location)
-                self.profile_age = re.findall('^Location: (.+?) Age: (.+)', line)[0][1]
-                self.textedit_age.setText(self.profile_age)
+                if re.findall('^Location: (.+?) Age: (.+)', line):
+                    self.profile_age = re.findall('^Location: (.+?) Age: (.+)', line)[0][1].decode('string_escape')
+                    self.textedit_age.setText(self.profile_age)
                 if self.print_finger == 1:
                     print 'yes print finger !!!'
                     line = '<span style="color: #ffff00;">' + line + '</span>'
