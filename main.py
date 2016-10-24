@@ -5,6 +5,7 @@ import socket
 import ui
 import re
 import threading
+import cgi
 from PyQt4.QtCore import QThread, SIGNAL
 
 class chat_thread(QThread):
@@ -343,6 +344,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         elif re.findall('^/finger', self.msg):
 
             print 'set finger to 1'
+            self.print_finger = 1
             self.msg = self.msg + ' ' + str(self.client_tag)
             print self.msg
             self.get_thread.s.send(self.msg)
@@ -367,6 +369,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
             self.get_thread.s.send("\r\n")
 
         elif re.findall('^/stats (.+?)$', self.msg):
+            self.print_stats = 1
             self.msg = self.msg + ' ' + self.client_tag
             print self.msg
             self.get_thread.s.send(str(self.msg))
@@ -531,54 +534,100 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
         if re.findall('^Created:', msg):
             list_profile_description = []
-            self.list_games.clear()
-            self.games = []
-
             msg_2 = msg.splitlines()
 
             for line in msg_2:
 
+                if re.findall('^Created: (.+?)', line):
 
-                if re.findall('^Created:', line):
-                    continue
+                    if self.print_finger == 1:
+                        line = '<span style="color: #ffff00;">' + line + '</span>'
+                        self.textedit_chat.append(line.decode('string_escape'))
 
-                elif re.findall('^Login:', line):
-                    continue
+                elif re.findall('^Clan ?: (.+) Rank: (.+?)', line):
 
-                elif re.findall('^Location:', line):
-                    continue
+                    if self.print_finger == 1:
+                        line = '<span style="color: #ffff00;">' + line + '</span>'
+                        self.textedit_chat.append(line.decode('string_escape'))
 
-                elif re.findall('^Client:', line):
-                    continue
+                elif re.findall('^Location: (.+?) Age:', line):
 
-                elif re.findall('^On since', line):
-                    continue
+                    self.profile_location = re.findall('^Location: (.+?) Age:', line)[0].decode('string_escape')
 
-                elif re.findall('^Idle', line):
-                    continue
+                    if re.findall('^Location: .+? Age: (.+)', line):
+                        self.profile_age = re.findall('^Location: .+? Age: (.+)', line)[0].decode('string_escape')
+                        self.textedit_age.setText(self.profile_age)
+                    list_profile_location = []
 
-                # PvPGN typo
-                elif re.findall('^Clan : ', line):
-                    continue
+                    if re.findall('https?://.+?\.', self.profile_location.lower()):
 
-                # Incase PvPGN fixes typo
-                elif re.findall('^Clan: ', line):
-                    continue
+                        msg_words = self.profile_location.split()
+                        word_list = []
+                        for word in msg_words:
+                            word_lower = word.lower()
+                            if re.findall('^https?://.+?\..+', word_lower):
+                                link_parts = re.findall('^(https?://.+)', word_lower)
+                                link = link_parts[0]
+                                link = '<a href="' + link + '">' + link + '</a>'
+                                word_list.append(link)
+                            else:
+                                word_list.append(word)
+                        word_list = ' '.join(word_list)
+                        word_list = '<span>' + word_list + '</span>'
+                        list_profile_location.append(word_list)
+
+
+                    else:
+                        line = '<span>' + cgi.escape(line) + '</span>'
+                        list_profile_location.append(self.profile_location)
+
+                    self.profile_location = '<br>'.join(list_profile_location).decode('string_escape')
+                    print self.profile_location
+                    self.textedit_location.setText(self.profile_location)
+
+                    if self.print_finger == 1:
+
+                        print 'yes print finger !!!'
+                        line = '<span style="color: #ffff00;">' + line + '</span>'
+                        self.textedit_chat.append(line.decode('string_escape'))
 
                 else:
-                    list_profile_description.append(line)
+                    if re.findall('https?://.+?\.', line.lower()):
 
-            self.profile_description = '\n'.join(list_profile_description).decode('string_escape')
-            self.textedit_description.setText(self.profile_description)
-            print '-- prof desc! ----'
-            print self.profile_description
-            print '---- done prof desc ---'
+                        msg_words = line.split()
+                        word_list = []
+                        for word in msg_words:
+                            word_lower = word.lower()
+                            if re.findall('^https?://.+?\..+', word_lower):
+                                link_parts = re.findall('^(https?://.+)', word_lower)
+                                link = link_parts[0]
+                                link = '<a href="' + link + '">' + link + '</a>'
+                                word_list.append(link)
+                            else:
+                                word_list.append(cgi.escape(word))
+                        word_list = ' '.join(word_list)
+                        word_list = '<span>' + word_list + '</span>'
+                        list_profile_description.append(word_list)
 
 
-            for game in self.games:
-                self.list_games.addItem(game)
-            print self.games
-            self.print_games = 0
+                    else:
+                        line = '<span>' + cgi.escape(line) + '</span>'
+                        list_profile_description.append(line)
+
+                    if self.print_finger == 1:
+
+                        print 'yes print finger !!!'
+                        line = '<span style="color: #ffff00;">' + line + '</span>'
+                        self.textedit_chat.append(line.decode('string_escape'))
+                        self.print_finger = 0
+
+
+
+                    self.profile_description = '<br>'.join(list_profile_description).decode('string_escape')
+                    print self.profile_description
+                    self.textedit_description.setText(self.profile_description)
+
+            return
 
         msg = msg.splitlines()
         for line in msg:
@@ -626,43 +675,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                     print 'yes print finger !!!'
                     line = '<span style="color: #ffff00;">' + line + '</span>'
                     self.textedit_chat.append(line.decode('string_escape'))
-                else:
-                    continue
 
-            elif re.findall('^Created: (.+?)', line):
-
-                if self.print_finger == 1:
-                    print 'yes print finger !!!'
-                    line = '<span style="color: #ffff00;">' + line + '</span>'
-                    self.textedit_chat.append(line.decode('string_escape'))
-
-                else:
-                    continue
-
-            elif re.findall('^Clan: (.+) Rank: (.+?)', line):
-
-                if self.print_finger == 1:
-                    line = '<span style="color: #ffff00;">' + line + '</span>'
-                    self.textedit_chat.append(line.decode('string_escape'))
-
-                else:
-                    continue
-
-            elif re.findall('^Location: (.+?) Age:', line):
-
-                self.profile_location = re.findall('^Location: (.+?) Age:', line)[0].decode('string_escape')
-
-                self.textedit_location.setText(self.profile_location)
-                if re.findall('^Location: (.+?) Age: (.+)', line):
-                    self.profile_age = re.findall('^Location: (.+?) Age: (.+)', line)[0][1].decode('string_escape')
-                    self.textedit_age.setText(self.profile_age)
-                if self.print_finger == 1:
-                    print 'yes print finger !!!'
-                    line = '<span style="color: #ffff00;">' + line + '</span>'
-                    self.textedit_chat.append(line.decode('string_escape'))
-
-                else:
-                    continue
 
             elif re.findall('^Currently logged on Administrators:', line):
                 try:
@@ -676,6 +689,27 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                     line = '<span style="color: #ffff00;">' + line + '</span>'
                     self.textedit_chat.append(line.decode('string_escape'))
                     self.print_admins = 0
+
+            elif re.findall('\'s record:$', line):
+                    if self.print_stats == 1:
+                        line = '<span style="color: #ffff00;">' + line + '</span>'
+                        self.textedit_chat.append(line.decode('string_escape'))
+
+            elif re.findall('^Normal games:', line):
+                    if self.print_stats == 1:
+                        line = '<span style="color: #ffff00;">' + line + '</span>'
+                        self.textedit_chat.append(line.decode('string_escape'))
+
+            elif re.findall('^Ladder games:', line):
+                    if self.print_stats == 1:
+                        line = '<span style="color: #ffff00;">' + line + '</span>'
+                        self.textedit_chat.append(line.decode('string_escape'))
+
+            elif re.findall('^IronMan games:', line):
+                    if self.print_stats == 1:
+                        line = '<span style="color: #ffff00;">' + line + '</span>'
+                        self.textedit_chat.append(line.decode('string_escape'))
+                        self.print_stats = 0
 
             elif re.findall('^\[(.+)\]$', line):
                 user_status_msg = re.findall('^\[(.+)\]$', line)
