@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'warchatter.ui'
 #
-# Created: Fri Oct 21 16:53:19 2016
+# Created: Mon Oct 24 10:13:26 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -127,6 +127,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.addLayout(self.verticalLayout_9)
         self.textedit_chat = QtGui.QTextBrowser(self.verticalLayoutWidget)
         self.textedit_chat.setAutoFillBackground(False)
+        self.textedit_chat.setLineWrapMode(QtGui.QTextEdit.WidgetWidth)
+        self.textedit_chat.setLineWrapColumnOrWidth(80)
         self.textedit_chat.setOpenExternalLinks(True)
         self.textedit_chat.setObjectName(_fromUtf8("textedit_chat"))
         self.horizontalLayout_3.addWidget(self.textedit_chat)
@@ -324,6 +326,7 @@ class Ui_MainWindow(object):
         self.textedit_location.setSizePolicy(sizePolicy)
         self.textedit_location.setMinimumSize(QtCore.QSize(0, 0))
         self.textedit_location.setMaximumSize(QtCore.QSize(16777215, 25))
+        self.textedit_location.setOpenExternalLinks(True)
         self.textedit_location.setObjectName(_fromUtf8("textedit_location"))
         self.verticalLayout_13.addWidget(self.textedit_location)
         self.horizontalLayout_12 = QtGui.QHBoxLayout()
@@ -333,6 +336,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_12.addWidget(self.label_8)
         self.verticalLayout_13.addLayout(self.horizontalLayout_12)
         self.textedit_description = QtGui.QTextBrowser(self.verticalLayoutWidget_5)
+        self.textedit_description.setLineWrapMode(QtGui.QTextEdit.WidgetWidth)
+        self.textedit_description.setLineWrapColumnOrWidth(80)
+        self.textedit_description.setOpenExternalLinks(True)
         self.textedit_description.setObjectName(_fromUtf8("textedit_description"))
         self.verticalLayout_13.addWidget(self.textedit_description)
         spacerItem11 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
@@ -347,6 +353,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.textedit_stats.sizePolicy().hasHeightForWidth())
         self.textedit_stats.setSizePolicy(sizePolicy)
         self.textedit_stats.setSizeIncrement(QtCore.QSize(0, 0))
+        self.textedit_stats.setOpenExternalLinks(True)
         self.textedit_stats.setObjectName(_fromUtf8("textedit_stats"))
         self.verticalLayout_3.addWidget(self.textedit_stats)
         self.horizontalLayout_9.addLayout(self.verticalLayout_3)

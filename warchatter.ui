@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="page_login">
      <widget class="QWidget" name="verticalLayoutWidget_4">
@@ -261,6 +261,12 @@
           <widget class="QTextBrowser" name="textedit_chat">
            <property name="autoFillBackground">
             <bool>false</bool>
+           </property>
+           <property name="lineWrapMode">
+            <enum>QTextEdit::WidgetWidth</enum>
+           </property>
+           <property name="lineWrapColumnOrWidth">
+            <number>80</number>
            </property>
            <property name="html">
             <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -715,6 +721,9 @@ p, li { white-space: pre-wrap; }
                <height>25</height>
               </size>
              </property>
+             <property name="openExternalLinks">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item>
@@ -729,7 +738,17 @@ p, li { white-space: pre-wrap; }
             </layout>
            </item>
            <item>
-            <widget class="QTextBrowser" name="textedit_description"/>
+            <widget class="QTextBrowser" name="textedit_description">
+             <property name="lineWrapMode">
+              <enum>QTextEdit::WidgetWidth</enum>
+             </property>
+             <property name="lineWrapColumnOrWidth">
+              <number>80</number>
+             </property>
+             <property name="openExternalLinks">
+              <bool>true</bool>
+             </property>
+            </widget>
            </item>
            <item>
             <spacer name="verticalSpacer">
@@ -761,6 +780,9 @@ p, li { white-space: pre-wrap; }
                <width>0</width>
                <height>0</height>
               </size>
+             </property>
+             <property name="openExternalLinks">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
