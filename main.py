@@ -549,7 +549,12 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                     if self.print_finger == 1:
                         line = '<span style="color: #ffff00;">' + line + '</span>'
                         self.textedit_chat.append(line.decode('string_escape'))
-
+                elif re.findall('^Client: ', line):
+                    pass
+                elif re.findall('^On since ', line):
+                    pass
+                elif re.findall('^Idle ', line):
+                    pass
                 elif re.findall('^Location: (.+?) Age:', line):
 
                     self.profile_location = re.findall('^Location: (.+?) Age:', line)[0].decode('string_escape')
