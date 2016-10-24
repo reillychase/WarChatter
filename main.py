@@ -361,6 +361,12 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
             self.get_thread.s.send(str(self.msg))
             self.get_thread.s.send("\r\n")
 
+        elif re.findall('^/ladderinfo (.+?)$', self.msg):
+            self.msg = self.msg + ' ' + self.client_tag
+            print self.msg
+            self.get_thread.s.send(str(self.msg))
+            self.get_thread.s.send("\r\n")
+
         elif re.findall('^/games$', self.msg):
             self.msg = self.msg + ' ' + self.client_tag
             self.print_games = 1
