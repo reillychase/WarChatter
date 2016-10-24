@@ -45,10 +45,10 @@ class chat_thread(QThread):
 
                 self.s.send("\r\n")
 
-                self.s.send(self.username)
+                self.s.send(self.username.decode('utf-8'))
                 self.s.send("\r\n")
 
-                self.s.send(self.password)
+                self.s.send(self.password.decode('utf-8'))
                 self.s.send("\r\n")
 
                 total_data = [];
@@ -88,7 +88,7 @@ class chat_thread(QThread):
                     self.connection_status = 1
                     if self.channel:
                         if self.channel != "chat":
-                            self.s.send("/join " + self.channel)
+                            self.s.send("/join " + self.channel.decode('utf-8'))
                             self.s.send("\r\n")
                             total_data = [];
                             data = ''
@@ -205,33 +205,33 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
     def go_to_channel(self):
         print 'go.to.channel()'
 
-        channel = self.input_channel_2.text()
+        channel = unicode(self.input_channel_2.text().toUtf8(), encoding="UTF-8")
         if channel != '':
             print channel
             self.msg = '/join ' + channel
-            if str(self.channel_name).lower() == str(channel).lower():
+            if unicode(self.channel_name).lower() == unicode(channel).lower():
                 self.stackedWidget.setCurrentIndex(1)
 
             else:
                 self.msg = '/join ' + channel
-                self.get_thread.s.send(str(self.msg))
+                self.get_thread.s.send(self.msg.encode('utf-8'))
                 self.get_thread.s.send("\r\n")
                 self.stackedWidget.setCurrentIndex(1)
 
     def open_channel(self):
-        if str(self.channel_name).lower() == str(self.list_channels.currentItem().text()).lower():
+        if str(self.channel_name).lower() == unicode(self.list_channels.currentItem.text().toUtf8(), encoding="UTF-8").lower():
             self.stackedWidget.setCurrentIndex(1)
 
         else:
-            channel = self.list_channels.currentItem().text()
+            channel = unicode(self.list_channels.currentItem.text().toUtf8(), encoding="UTF-8")
             self.msg = '/join ' + channel
-            self.get_thread.s.send(str(self.msg))
+            self.get_thread.s.send(self.msg)
             self.get_thread.s.send("\r\n")
             self.stackedWidget.setCurrentIndex(1)
 
     def open_games(self):
         self.msg = '/games ' + self.client_tag
-        self.get_thread.s.send(str(self.msg))
+        self.get_thread.s.send(self.msg)
         self.get_thread.s.send("\r\n")
         self.stackedWidget.setCurrentIndex(2)
 
@@ -239,7 +239,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
         if self.first_time_check_channels == 0:
             self.msg = '/channels w2bn'
-            self.get_thread.s.send(str(self.msg))
+            self.get_thread.s.send(self.msg)
             self.get_thread.s.send("\r\n")
             self.first_time_check_channels = 1
         self.stackedWidget.setCurrentIndex(4)
@@ -284,15 +284,15 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
     def send_whisper(self):
         print 'WarChatter.send_whisper()'
-        self.username = self.input_username.text()
-        self.msg = str(self.input_msg.text())
+        self.username = str(self.input_username.text()).decode('utf-8')
+        self.msg = str(self.input_msg.text()).decode('utf-8')
         self.whisper_user = self.list_users.currentItem().text()
         self.msg = '/m ' + str(self.whisper_user) + ' ' + self.msg
         self.input_msg.setText('')
 
         if re.findall('(^https?)://(.+?)\..+', self.msg.lower()):
 
-            self.get_thread.s.send(self.msg)
+            self.get_thread.s.send(self.msg.encode('utf-8'))
             self.get_thread.s.send("\r\n")
 
             word_list = []
@@ -316,7 +316,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
 
         else:
-            self.get_thread.s.send(self.msg)
+            self.get_thread.s.send(self.msg.decode('utf-8'))
             self.get_thread.s.send("\r\n")
             msg = '<span style="color: #00ffff;">&lt;' + self.username + '&gt;</span><span style="color: white;" > ' + self.msg + '</span>'
 
@@ -325,8 +325,8 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
     def send_msg(self):
         print 'WarChatter.send_msg()'
         # Gather and assign all the user input:
-        self.username = self.input_username.text()
-        self.msg = str(self.input_msg.text())
+        self.username = unicode(self.input_username.text().toUtf8(), encoding="UTF-8")
+        self.msg = unicode(self.input_msg.text().toUtf8(), encoding="UTF-8")
 
         self.input_msg.setText('')
 
@@ -358,27 +358,27 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         elif re.findall('^/stats$', self.msg):
             self.msg = self.msg + ' ' + self.username + ' ' + self.client_tag
             print self.msg
-            self.get_thread.s.send(str(self.msg))
+            self.get_thread.s.send(self.msg)
             self.get_thread.s.send("\r\n")
 
         elif re.findall('^/ladderinfo (.+?)$', self.msg):
             self.msg = self.msg + ' ' + self.client_tag
             print self.msg
-            self.get_thread.s.send(str(self.msg))
+            self.get_thread.s.send(self.msg)
             self.get_thread.s.send("\r\n")
 
         elif re.findall('^/games$', self.msg):
             self.msg = self.msg + ' ' + self.client_tag
             self.print_games = 1
             print self.msg
-            self.get_thread.s.send(str(self.msg))
+            self.get_thread.s.send(self.msg)
             self.get_thread.s.send("\r\n")
 
         elif re.findall('^/stats (.+?)$', self.msg):
             self.print_stats = 1
             self.msg = self.msg + ' ' + self.client_tag
             print self.msg
-            self.get_thread.s.send(str(self.msg))
+            self.get_thread.s.send(self.msg)
             self.get_thread.s.send("\r\n")
 
         elif re.findall('^/', self.msg):
@@ -411,7 +411,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
 
         else:
-            self.get_thread.s.send(self.msg)
+            self.get_thread.s.send(self.msg.encode('utf-8', 'string_escape'))
             self.get_thread.s.send("\r\n")
             msg = '<span style="color: #00ffff;">&lt;' + self.username + '&gt;</span><span style="color: white;" > ' + self.msg + '</span>'
             self.catch_textedit_chat_2(msg, 'white')
@@ -444,11 +444,11 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         print 'WarChat.login()'
 
         # Gather and assign all the user input:
-        self.username = self.input_username.text()
-        self.password = self.input_password.text()
-        self.server = self.input_server.text()
-        self.channel = self.input_channel.text()
-        self.client_tag = self.input_client_tag.text()
+        self.username = unicode(self.input_username.text().toUtf8(), encoding="UTF-8")
+        self.password = unicode(self.input_password.text().toUtf8(), encoding="UTF-8")
+        self.server = unicode(self.input_server.text().toUtf8(), encoding="UTF-8")
+        self.channel = unicode(self.input_channel.text().toUtf8(), encoding="UTF-8")
+        self.client_tag = unicode(self.input_client_tag.text().toUtf8(), encoding="UTF-8")
         # Validate user input/check for missing params
         if not self.username or not self.password:
             self.label_status_msg.setText("Username/Password missing")
@@ -481,14 +481,14 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.label_status_msg.setStyleSheet('color: ' + color)
 
     def catch_textedit_chat_2(self, msg, color):
-        self.textedit_chat.append(str(msg).decode('string_escape'))
+        self.textedit_chat.append(msg)
 
     def catch_textedit_chat(self, msg, color):
 
         print 'WarChat.catch_textedit_chat()'
 
         # This is where all the chatroom data styling and filtering takes place
-        msg = str(msg)
+        msg = unicode(msg.toUtf8(), encoding="UTF-8")
 
         if re.findall('^ -----------name----------- users ----admin/operator----', msg):
             self.list_channels.clear()
