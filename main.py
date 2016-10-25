@@ -68,10 +68,6 @@ class chat_thread(QThread):
                             break
                 data = ''.join(total_data)
 
-                print 'WarChatter DEBUG: chat_thread.pvpgn_login() Output -----'
-                print data
-                print '--------------------------------------------------'
-
                 if "failed" in data:
                     self.connection_status = 0
                     self.emit(SIGNAL('catch_status_msg(QString, QString)'), 'Login failed', 'red')
@@ -116,9 +112,6 @@ class chat_thread(QThread):
                     break
 
             except Exception as e:
-                print 'WarChatter Debug: chat_thread.pvpgn_login Socket Error -----'
-                print e
-                print '--------------------------------------------------------'
                 self.emit(SIGNAL('catch_status_msg(QString, QString)'), 'No reply from server', 'red')
                 self.connection_status = 0
                 return
@@ -135,7 +128,7 @@ class chat_thread(QThread):
                         self.emit(SIGNAL('catch_textedit_chat(QString, QString)'), data, 'white')
                         print '-----------'
                         print data
-                        print '------------'
+                        print '-----------'
                         time.sleep(.1)
                 except:
                     time.sleep(.1)
@@ -239,7 +232,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
     def open_channels(self):
 
         if self.first_time_check_channels == 0:
-            self.msg = '/channels w2bn'
+            self.msg = '/channels ' + self.client_tag
             self.get_thread.s.send(self.msg)
             self.get_thread.s.send("\r\n")
             self.first_time_check_channels = 1
@@ -276,7 +269,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
     def check_admins(self):
 
         if self.endflag == 0:
-            self.get_thread.s.send("/admins")
+            self.get_thread.s.send("/channels " + self.client_tag)
             self.get_thread.s.send("\r\n")
             threading.Timer(60, self.check_admins).start()
 
@@ -346,8 +339,6 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
             self.get_thread.s.send("\r\n")
 
         elif re.findall('^/finger', self.msg):
-
-            print 'set finger to 1'
             self.print_finger = 1
             self.msg = self.msg + ' ' + str(self.client_tag)
             print self.msg
@@ -506,6 +497,23 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
                     self.channels.append(re.findall('^ (.+) .?.?.?.?.?.?.?.?.? -', line)[0].strip())
 
+                    if re.findall('^ .+ .?.?.?.?.?.?.?.?.? - (.+)', line):
+
+                        chan_admins = re.findall('^ .+ .?.?.?.?.?.?.?.?.? - (.+)', line)[0]
+                        chan_admins = chan_admins.split(' ,')
+                        print chan_admins
+
+                        for admin in chan_admins:
+                            admin_level = admin[-2]
+                            if admin_level == 'A':
+                                chan = 'all'
+                            channel_admin_list = []
+                            chan = re.findall('^ (.+) .?.?.?.?.?.?.?.?.? -', line)[0].strip()
+                            channel_admin_list.append(chan)
+                            channel_admin_list.append(admin[:-3])
+                            self.logged_on_admins.append(channel_admin_list)
+                        print self.logged_on_admins
+
                     if self.print_channels == 1:
                         line = '<span style="color: #ffff00;">' + line + '</span>'
                         self.textedit_chat.append(str(line).decode('string_escape'))
@@ -513,10 +521,10 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
             self.channels.pop(0)
             for channel in self.channels:
                 self.list_channels.addItem(channel)
-            print self.channels
             self.input_channel_2.setText(self.channels[0])
 
             return
+
 
         if re.findall('^ ------name------ p -status- --------type--------- count', msg):
             self.list_games.clear()
@@ -532,7 +540,6 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                     if 'open' in line:
                         self.games.append(re.findall('^\s(.+?)\s.\s', line)[0].strip())
                         game = re.findall('^\s(.+?)\s.\s', line)[0].strip()
-                        print game
 
                     if self.print_games == 1:
                         line = '<span style="color: #ffff00;">' + line + '</span>'
@@ -540,7 +547,6 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
             for game in self.games:
                 self.list_games.addItem(game)
-            print self.games
             self.print_games = 0
             return
 
@@ -603,8 +609,6 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                     self.textedit_location.setText(self.profile_location)
 
                     if self.print_finger == 1:
-
-                        print 'yes print finger !!!'
                         line = '<span style="color: #ffff00;">' + line + '</span>'
                         self.textedit_chat.append(line.decode('string_escape'))
 
@@ -632,13 +636,9 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                         list_profile_description.append(line)
 
                     if self.print_finger == 1:
-
-                        print 'yes print finger !!!'
                         line = '<span style="color: #ffff00;">' + line + '</span>'
                         self.textedit_chat.append(line.decode('string_escape'))
                         self.print_finger = 0
-
-
 
                     self.profile_description = '<br>'.join(list_profile_description).decode('string_escape')
                     print self.profile_description
@@ -682,11 +682,6 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                     self.textedit_chat.append(line.decode('utf-8'))
 
                 else:
-                    print 'wefwefwefwfwefwef'
-
-                    print 'above'
-                    print line
-                    print 'jajaja'
                     line = '<span style="color: #00ef00;">' + line + '</span>'
                     line = line.encode('latin-1')
                     self.textedit_chat.append(line.decode('latin-1'))
@@ -698,10 +693,15 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                     self.profile_sex = re.findall('^Login: (.+) #.+? Sex: (.+)', line)[0][1].decode('string_escape')
                     self.textedit_sex.setText(self.profile_sex)
                 if self.print_finger == 1:
-                    print 'yes print finger !!!'
                     line = '<span style="color: #ffff00;">' + line + '</span>'
                     self.textedit_chat.append(line.decode('string_escape'))
 
+            elif re.findall('^Currently accessable channels:', line):
+
+                if self.print_channels == 1:
+                    line = '<span style="color: #ffff00;">' + line + '</span>'
+                    self.textedit_chat.append(line.decode('string_escape'))
+                    self.print_channels = 0
 
             elif re.findall('^Currently logged on Administrators:', line):
                 try:
@@ -838,30 +838,36 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
             elif re.findall('^<(.+?)> ', line):
                 username = re.findall('^<(.+?)> ', line)[0]
-                if username in self.logged_on_admins:
 
-                    if self.link_flag == 1:
-                        line = '<span style="color: #00ffff;">&lt;' + username + '&gt;</span><span style="color: #00ffff;"> ' + self.line_w_links + '</span>'
-                        line = line.encode('latin-1')
-                        self.textedit_chat.append(line.decode('utf-8'))
+                for admin_list in self.logged_on_admins:
 
-                    else:
-                        line = line.decode('unicode-escape')
-                        line = '<span style="color: #00ffff;">&lt;' + username + '&gt;</span><span style="color: #00ffff;"> ' + line + '</span>'
-                        line = line.encode('latin-1')
-                        self.textedit_chat.append(line.decode('utf-8'))
+                    if admin_list[1] == username:
+
+                        if admin_list[0] == 'all' or admin_list[0] == self.channel_name:
+
+                            if self.link_flag == 1:
+                                line = '<span style="color: #00ffff;">&lt;' + username + '&gt;</span><span style="color: #00ffff;"> ' + self.line_w_links + '</span>'
+                                line = line.encode('latin-1')
+                                self.textedit_chat.append(line.decode('utf-8'))
+                                return
+
+                            else:
+                                line = line.decode('unicode-escape')
+                                line = '<span style="color: #00ffff;">&lt;' + username + '&gt;</span><span style="color: #00ffff;"> ' + line + '</span>'
+                                line = line.encode('latin-1')
+                                self.textedit_chat.append(line.decode('utf-8'))
+                                return
+
+                if self.link_flag == 1:
+                    line = '<span style="color: #ffff00;">&lt;' + username + '&gt;</span><span style="color: white;" > ' + self.line_w_links + '</span>'
+                    line = line.encode('latin-1')
+                    self.textedit_chat.append(line.decode('utf-8'))
+
                 else:
-
-                    if self.link_flag == 1:
-                        line = '<span style="color: #ffff00;">&lt;' + username + '&gt;</span><span style="color: white;" > ' + self.line_w_links + '</span>'
-                        line = line.encode('latin-1')
-                        self.textedit_chat.append(line.decode('utf-8'))
-
-                    else:
-                        line = line.decode('unicode-escape')
-                        line = '<span style="color: #ffff00;">&lt;' + username + '&gt;</span><span style="color: white;"> ' + line + '</span>'
-                        line = line.encode('latin-1')
-                        self.textedit_chat.append(line.decode('utf-8'))
+                    line = line.decode('unicode-escape')
+                    line = '<span style="color: #ffff00;">&lt;' + username + '&gt;</span><span style="color: white;"> ' + line + '</span>'
+                    line = line.encode('latin-1')
+                    self.textedit_chat.append(line.decode('utf-8'))
 
 
             else:
