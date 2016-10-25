@@ -285,15 +285,17 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
     def send_whisper(self):
         print 'WarChatter.send_whisper()'
-        self.username = str(self.input_username.text()).decode('latin-1')
-        self.msg = str(self.input_msg.text()).decode('latin-1')
+        self.username = unicode(self.input_username.text().toUtf8(), encoding="utf-8")
+
+        self.msg = unicode(self.input_msg.text().toUtf8(), encoding="utf-8")
+
         self.whisper_user = self.list_users.currentItem().text()
         self.msg = '/m ' + str(self.whisper_user) + ' ' + self.msg
         self.input_msg.setText('')
 
         if re.findall('(^https?)://(.+?)\..+', self.msg.lower()):
 
-            self.get_thread.s.send(self.msg.encode('latin-1'))
+            self.get_thread.s.send(self.msg.encode('utf-8', 'string_escape'))
             self.get_thread.s.send("\r\n")
 
             word_list = []
@@ -317,7 +319,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
 
         else:
-            self.get_thread.s.send(self.msg.decode('latin-1'))
+            self.get_thread.s.send(self.msg.encode('utf-8', 'string_escape'))
             self.get_thread.s.send("\r\n")
             msg = '<span style="color: #00ffff;">&lt;' + self.username + '&gt;</span><span style="color: white;" > ' + self.msg + '</span>'
 
@@ -839,13 +841,13 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                 if username in self.logged_on_admins:
 
                     if self.link_flag == 1:
-                        line = '<span style="color: #00ffff;">&lt;' + username + '&gt;</span><span style="color: white;" > ' + self.line_w_links + '</span>'
+                        line = '<span style="color: #00ffff;">&lt;' + username + '&gt;</span><span style="color: #00ffff;"> ' + self.line_w_links + '</span>'
                         line = line.encode('latin-1')
                         self.textedit_chat.append(line.decode('utf-8'))
 
                     else:
                         line = line.decode('unicode-escape')
-                        line = '<span style="color: #00ffff;">&lt;' + username + '&gt;</span><span style="color: white;"> ' + line + '</span>'
+                        line = '<span style="color: #00ffff;">&lt;' + username + '&gt;</span><span style="color: #00ffff;"> ' + line + '</span>'
                         line = line.encode('latin-1')
                         self.textedit_chat.append(line.decode('utf-8'))
                 else:
