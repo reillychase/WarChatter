@@ -490,6 +490,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         if re.findall('^ -----------name----------- users ----admin/operator----', msg):
             self.list_channels.clear()
             self.channels = []
+            self.logged_on_admins = []
             msg_2 = msg.splitlines()
             for line in msg_2:
 
@@ -501,7 +502,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
                         chan_admins = re.findall('^ .+ .?.?.?.?.?.?.?.?.? - (.+)', line)[0]
                         chan_admins = chan_admins.split(' ,')
-                        print chan_admins
+
 
                         for admin in chan_admins:
                             admin_level = admin[-2]
@@ -512,12 +513,12 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                             channel_admin_list.append(chan)
                             channel_admin_list.append(admin[:-3])
                             self.logged_on_admins.append(channel_admin_list)
-                        print self.logged_on_admins
 
                     if self.print_channels == 1:
                         line = '<span style="color: #ffff00;">' + line + '</span>'
                         self.textedit_chat.append(str(line).decode('string_escape'))
 
+            print self.logged_on_admins
             self.channels.pop(0)
             for channel in self.channels:
                 self.list_channels.addItem(channel)
