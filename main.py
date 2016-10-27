@@ -172,6 +172,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.input_server.returnPressed.connect(self.login)
         self.input_channel.returnPressed.connect(self.login)
         self.input_client_tag.returnPressed.connect(self.login)
+        self.list_games.currentItemChanged.connect(self.get_game_info)
         # Gather and assign all the user input:
         self.username = ''
         self.password = ''
@@ -191,6 +192,9 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.profile_stats = ''
         self.print_finger = 0
         self.print_stats = 0
+
+    def get_game_info(self):
+        self.input_game_name.setText(self.list_games.currentItem().text())
 
     def update_channel(self):
         self.input_channel_2.setText(self.list_channels.currentItem().text())
