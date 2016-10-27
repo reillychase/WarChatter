@@ -535,21 +535,35 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
             msg_2 = msg.splitlines()
 
+            this_game = []
+
             for line in msg_2:
 
 
                 if re.findall('^\s(.+?)\s.\s', line):
 
                     if 'open' in line:
-                        self.games.append(re.findall('^\s(.+?)\s.\s', line)[0].strip())
-                        game = re.findall('^\s(.+?)\s.\s', line)[0].strip()
+                        game_name = re.findall('(.+) (n?y?) open (.+) (.)', line)[0][0].strip()
+                        game_is_private = re.findall('(.+) (n?y?) open (.+) (.)', line)[0][1].strip()
+                        game_type = re.findall('(.+) (n?y?) open (.+) (.)', line)[0][2].strip()
+                        game_count = re.findall('(.+) (n?y?) open (.+) (.)', line)[0][3].strip()
+
+                        if game_is_private == 'y':
+                            game_name = game_name + ' [Private]'
+
+                        this_game.append(game_name)
+                        this_game.append(game_is_private)
+                        this_game.append(game_type)
+                        this_game.append(game_count)
+
+                        self.games.append(this_game)
 
                     if self.print_games == 1:
                         line = '<span style="color: #ffff00;">' + line + '</span>'
                         self.textedit_chat.append(str(line).decode('string_escape'))
 
             for game in self.games:
-                self.list_games.addItem(game)
+                self.list_games.addItem(game[0])
             self.print_games = 0
             return
 
