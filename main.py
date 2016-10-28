@@ -197,12 +197,11 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.print_cons = 0
 
     def update_game_info(self):
+
         self.players_in_game = []
-        self.textedit_game_info.setText('')
-
-        print self.selected_game
         for player in self.player_status:
-
+            self.selected_game = self.list_games.currentItem().text()
+            print self.selected_game
             print player[4]
             if player[4] == self.selected_game:
 
@@ -211,6 +210,11 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
         print self.players_in_game
         for game in self.games:
+            print game[0].replace(' [Private]', '')
+            game[0] = game[0].replace(' [Private]', '')
+            self.selected_game = self.list_games.currentItem().text().replace(' [Private]', '')
+
+            print self.selected_game
 
             if self.selected_game == game[0]:
                 game_text = []
@@ -220,15 +224,15 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                 self.textedit_game_info.setText('\n'.join(game_text))
 
     def get_game_info(self):
+
         self.players_in_game = []
+
         self.selected_game = self.list_games.currentItem().text()
-        self.selected_game = self.selected_game.replace(' [Private]', '')
-        self.selected_game = re.findall('(.?.?.?.?.?.?.?)', self.selected_game)[0]
+        self.textedit_game_info.setText('')
         self.input_game_name.setText(self.selected_game)
-        self.print_cons = 0
-        self.msg = '/con'
-        self.get_thread.s.send(self.msg.encode('utf-8'))
-        self.get_thread.s.send("\r\n")
+        self.selected_game = self.selected_game.replace(' [Private]', '')
+        self.selected_game = re.findall('(.?.?.?.?.?.?.?.?)', self.selected_game)[0]
+        self.update_game_info()
 
     def update_channel(self):
         self.input_channel_2.setText(self.list_channels.currentItem().text())
@@ -264,6 +268,10 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
     def open_games(self):
         self.msg = '/games ' + self.client_tag
         self.get_thread.s.send(self.msg)
+        self.get_thread.s.send("\r\n")
+        self.print_cons = 0
+        self.msg = '/con'
+        self.get_thread.s.send(self.msg.encode('utf-8'))
         self.get_thread.s.send("\r\n")
         self.stackedWidget.setCurrentIndex(2)
 
@@ -584,19 +592,20 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
                         self.player_status.append(this_player)
 
-                        self.update_game_info()
-
                         if self.print_cons == 1:
                             line = '<span style="color: #ffff00;">' + line + '</span>'
                             self.textedit_chat.append(str(line).decode('string_escape'))
 
                 print self.player_status
 
-                return
+
+            if re.findall('------name------ p -status- --------type--------- count', msg):
+
+                pass
 
             else:
 
-                pass
+                return
 
         if re.findall('-----------name----------- users ----admin/operator----', msg):
             self.list_channels.clear()
@@ -638,10 +647,14 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                 self.list_channels.addItem(channel)
             self.input_channel_2.setText(self.channels[0])
 
-            return
+            if re.findall('------name------ p -status- --------type--------- count', msg):
+                pass
+            else:
+                return
 
 
         if re.findall('------name------ p -status- --------type--------- count', msg):
+
             self.list_games.clear()
             self.games = []
 
