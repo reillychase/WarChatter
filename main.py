@@ -190,11 +190,45 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.profile_location = ''
         self.profile_description = ''
         self.profile_stats = ''
+        self.players_in_game = []
+        self.player_status = []
         self.print_finger = 0
         self.print_stats = 0
+        self.print_cons = 0
+
+    def update_game_info(self):
+        self.players_in_game = []
+        self.textedit_game_info.setText('')
+
+        print self.selected_game
+        for player in self.player_status:
+
+            print player[4]
+            if player[4] == self.selected_game:
+
+                print player[0]
+                self.players_in_game.append(player[0])
+
+        print self.players_in_game
+        for game in self.games:
+
+            if self.selected_game == game[0]:
+                game_text = []
+                game_text.append('Type: ' + game[2])
+                game_text.append('Count: ' + game[3])
+                game_text.append('Players: ' + ', '.join(self.players_in_game))
+                self.textedit_game_info.setText('\n'.join(game_text))
 
     def get_game_info(self):
-        self.input_game_name.setText(self.list_games.currentItem().text())
+        self.players_in_game = []
+        self.selected_game = self.list_games.currentItem().text()
+        self.selected_game = self.selected_game.replace(' [Private]', '')
+        self.selected_game = re.findall('(.?.?.?.?.?.?.?)', self.selected_game)[0]
+        self.input_game_name.setText(self.selected_game)
+        self.print_cons = 0
+        self.msg = '/con'
+        self.get_thread.s.send(self.msg.encode('utf-8'))
+        self.get_thread.s.send("\r\n")
 
     def update_channel(self):
         self.input_channel_2.setText(self.list_channels.currentItem().text())
@@ -243,6 +277,8 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.stackedWidget.setCurrentIndex(4)
 
     def open_profile(self):
+        self.print_stats = 0
+        self.print_finger = 0
         self.textedit_name.setText('')
         self.textedit_age.setText('')
         self.textedit_sex.setText('')
@@ -267,6 +303,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.stackedWidget.setCurrentIndex(3)
 
     def back_to_chat(self):
+        self.textedit_game_info.setText('')
         self.list_games.clear()
         self.stackedWidget.setCurrentIndex(1)
 
@@ -356,7 +393,14 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
             self.get_thread.s.send("\r\n")
 
         elif re.findall('^/stats$', self.msg):
+            self.print_stats = 1
             self.msg = self.msg + ' ' + self.username + ' ' + self.client_tag
+            print self.msg
+            self.get_thread.s.send(self.msg.encode('utf-8', 'string_escape'))
+            self.get_thread.s.send("\r\n")
+
+        elif re.findall('^/con$', self.msg) or re.findall('^/connections$', self.msg):
+            self.print_cons = 1
             print self.msg
             self.get_thread.s.send(self.msg.encode('utf-8', 'string_escape'))
             self.get_thread.s.send("\r\n")
@@ -491,6 +535,68 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
         # This is where all the chatroom data styling and filtering takes place
         msg = unicode(msg.toUtf8(), encoding="latin-1")
+
+        if re.findall('bnet', msg):
+
+            msg_2 = msg.splitlines()
+            print msg_2
+            for line in msg_2:
+
+                if re.findall('^ bnet (.+) (.+) (.+) (.+) (.+)', line) or re.findall('^ bot (.+) (.+) (.+) (.+) (.+)', line) or re.findall('^ telnet (.+) (.+) (.+) (.+) (.+)', line):
+
+                    self.player_status = []
+                    msg_is_con_msg = 1
+
+                    break
+
+                else:
+                    msg_is_con_msg = 0
+
+            if msg_is_con_msg == 1:
+
+                for line in msg_2:
+                    print line
+                    if ' -class -tag -----name------ -lat(ms)- ----channel---- --game' in line:
+                        if self.print_cons == 1:
+                            line = '<span style="color: #ffff00;">' + line + '</span>'
+                            self.textedit_chat.append(str(line).decode('string_escape'))
+                        continue
+                    elif re.findall('^ bnet (.+) (.+) (.+) (.+) (.+)', line) or re.findall('^ bot (.+) (.+) (.+) (.+) (.+)', line) or re.findall('^ telnet (.+) (.+) (.+) (.+) (.+)', line):
+
+                        try:
+                            line2 = re.sub(' +', ' ', line)
+                            line2 = re.findall('^ (.+?) (.+?) (.+?) (.+?) (.+?) (.+)', line2)
+                            player_name = line2[0][2].decode('string-escape').strip('"')
+                            player_lat = line2[0][3]
+                            player_icon = line2[0][1]
+                            player_game = line2[0][5]
+                            player_game = player_game[:-1]
+                            player_channel = line2[0][4]
+                        except:
+                            continue
+                        this_player = []
+                        this_player.append(player_name)
+                        this_player.append(player_lat)
+                        this_player.append(player_icon)
+                        this_player.append(player_channel)
+                        this_player.append(player_game)
+                        print this_player
+
+                        self.player_status.append(this_player)
+
+                        self.update_game_info()
+
+                        if self.print_cons == 1:
+                            line = '<span style="color: #ffff00;">' + line + '</span>'
+                            self.textedit_chat.append(str(line).decode('string_escape'))
+
+                print self.player_status
+
+                return
+
+            else:
+
+                pass
 
         if re.findall('-----------name----------- users ----admin/operator----', msg):
             self.list_channels.clear()
@@ -663,7 +769,6 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                     if self.print_finger == 1:
                         line = '<span style="color: #ffff00;">' + cgi.escape(line) + '</span>'
                         self.textedit_chat.append(line.decode('string_escape'))
-                        self.print_finger = 0
 
                     self.profile_description = '<br>'.join(list_profile_description).decode('string_escape')
                     print self.profile_description
@@ -721,12 +826,17 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                     line = '<span style="color: #ffff00;">' + line + '</span>'
                     self.textedit_chat.append(line.decode('string_escape'))
 
+            elif re.findall('^Current connections:', line):
+
+                if self.print_cons == 1:
+                    line = '<span style="color: #ffff00;">' + line + '</span>'
+                    self.textedit_chat.append(line.decode('string_escape'))
+
             elif re.findall('^Currently accessable channels:', line):
 
                 if self.print_channels == 1:
                     line = '<span style="color: #ffff00;">' + line + '</span>'
                     self.textedit_chat.append(line.decode('string_escape'))
-                    self.print_channels = 0
 
             elif re.findall('^Currently logged on Administrators:', line):
                 try:
