@@ -199,9 +199,9 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
     def update_game_info(self):
 
         self.players_in_game = []
+        self.selected_game = re.findall('(.?.?.?.?.?.?.?)', self.selected_game)[0]
         for player in self.player_status:
-            self.selected_game = self.list_games.currentItem().text()
-            print self.selected_game
+            player[4] = re.findall('(.?.?.?.?.?.?.?)', player[4])[0]
             print player[4]
             if player[4] == self.selected_game:
 
@@ -213,8 +213,8 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
             print game[0].replace(' [Private]', '')
             game[0] = game[0].replace(' [Private]', '')
             self.selected_game = self.list_games.currentItem().text().replace(' [Private]', '')
-
-            print self.selected_game
+            self.selected_game = re.findall('(.?.?.?.?.?.?.?)', self.selected_game)[0]
+            game[0] = re.findall('(.?.?.?.?.?.?.?)',game[0])[0]
 
             if self.selected_game == game[0]:
                 game_text = []
