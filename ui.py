@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'warchatter.ui'
 #
-# Created: Mon Oct 24 10:13:26 2016
+# Created: Thu Oct 27 17:14:58 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -208,10 +208,10 @@ class Ui_MainWindow(object):
         self.label_14 = QtGui.QLabel(self.verticalLayoutWidget_3)
         self.label_14.setObjectName(_fromUtf8("label_14"))
         self.verticalLayout_11.addWidget(self.label_14)
-        self.lineEdit = QtGui.QLineEdit(self.verticalLayoutWidget_3)
-        self.lineEdit.setEnabled(False)
-        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
-        self.verticalLayout_11.addWidget(self.lineEdit)
+        self.input_game_name = QtGui.QLineEdit(self.verticalLayoutWidget_3)
+        self.input_game_name.setEnabled(False)
+        self.input_game_name.setObjectName(_fromUtf8("input_game_name"))
+        self.verticalLayout_11.addWidget(self.input_game_name)
         self.label_15 = QtGui.QLabel(self.verticalLayoutWidget_3)
         self.label_15.setObjectName(_fromUtf8("label_15"))
         self.verticalLayout_11.addWidget(self.label_15)

@@ -495,7 +495,6 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         if re.findall('-----------name----------- users ----admin/operator----', msg):
             self.list_channels.clear()
             self.channels = []
-            self.logged_on_admins = []
             msg_2 = msg.splitlines()
             for line in msg_2:
 
@@ -518,7 +517,10 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                             channel_admin_list.append(admin_level)
                             channel_admin_list.append(chan)
                             channel_admin_list.append(admin[:-3])
-                            self.logged_on_admins.append(channel_admin_list)
+                            if channel_admin_list in self.logged_on_admins:
+                                pass
+                            else:
+                                self.logged_on_admins.append(channel_admin_list)
 
                     if self.print_channels == 1:
                         line = '<span style="color: #ffff00;">' + line + '</span>'
