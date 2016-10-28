@@ -666,12 +666,13 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
                 this_game = []
 
-                if re.findall('^(.+) (n?y?) open (.+) (.)', line):
+                if re.findall('^(.+) (n?y?) (.+?) (.+) (.)', line):
 
-                    game_name = re.findall('(.+) (n?y?) open (.+) (.)', line)[0][0].strip()
-                    game_is_private = re.findall('(.+) (n?y?) open (.+) (.)', line)[0][1].strip()
-                    game_type = re.findall('(.+) (n?y?) open (.+) (.)', line)[0][2].strip()
-                    game_count = re.findall('(.+) (n?y?) open (.+) (.)', line)[0][3].strip()
+                    game_name = re.findall('(.+) (n?y?) (.+?) (.+) (.)', line)[0][0].strip()
+                    game_is_private = re.findall('(.+) (n?y?) (.+?) (.+) (.)', line)[0][1].strip()
+                    game_type = re.findall('(.+) (n?y?) (.+?) (.+) (.)', line)[0][2].strip()
+                    game_count = re.findall('(.+) (n?y?) (.+?) (.+) (.)', line)[0][3].strip()
+                    game_status = re.findall('(.+) (n?y?) (.+?) (.+) (.)', line)[0][2].strip()
 
                     if game_is_private == 'y':
                         game_name = game_name + ' [Private]'
