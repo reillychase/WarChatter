@@ -666,13 +666,13 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
                 this_game = []
 
-                if re.findall('^(.+) (n?y?) (.+?) (.+) (.)', line):
+                if re.findall('^(.+?) ([ny]) (.+?) (.+) (.)', line):
 
-                    game_name = re.findall('(.+) (n?y?) (.+?) (.+) (.)', line)[0][0].strip()
-                    game_is_private = re.findall('(.+) (n?y?) (.+?) (.+) (.)', line)[0][1].strip()
-                    game_type = re.findall('(.+) (n?y?) (.+?) (.+) (.)', line)[0][2].strip()
-                    game_count = re.findall('(.+) (n?y?) (.+?) (.+) (.)', line)[0][3].strip()
-                    game_status = re.findall('(.+) (n?y?) (.+?) (.+) (.)', line)[0][2].strip()
+                    game_name = re.findall('(.+?) ([ny]) (.+?) (.+) (.)', line)[0][0].strip()
+                    game_is_private = re.findall('(.+?) ([ny]) (.+?) (.+) (.)', line)[0][1].strip()
+                    game_type = re.findall('(.+?) ([ny]) (.+?) (.+) (.)', line)[0][3].strip()
+                    game_count = re.findall('(.+?) ([ny]) (.+?) (.+) (.)', line)[0][4].strip()
+                    game_status = re.findall('(.+?) ([ny]) (.+?) (.+) (.)', line)[0][2].strip()
 
                     if game_is_private == 'y':
                         game_name = game_name + ' [Private]'
@@ -681,6 +681,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
                     this_game.append(game_is_private)
                     this_game.append(game_type)
                     this_game.append(game_count)
+                    this_game.append(game_status)
 
                     self.games.append(this_game)
 
@@ -690,7 +691,8 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
 
             for game in self.games:
-                self.list_games.addItem(game[0])
+                if game[4] == 'open':
+                    self.list_games.addItem(game[0])
 
             self.print_games = 0
             return
