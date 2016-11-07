@@ -301,8 +301,7 @@ p, li { white-space: pre-wrap; }
             </size>
            </property>
            <property name="styleSheet">
-            <string notr="true">background-color: gray
-</string>
+            <string notr="true">background-color: black;</string>
            </property>
           </widget>
          </item>

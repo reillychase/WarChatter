@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'warchatter.ui'
 #
-# Created: Thu Oct 27 17:14:58 2016
+# Created: Mon Nov  7 11:35:51 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -140,8 +140,7 @@ class Ui_MainWindow(object):
         self.list_users.setSizePolicy(sizePolicy)
         self.list_users.setMinimumSize(QtCore.QSize(175, 0))
         self.list_users.setMaximumSize(QtCore.QSize(175, 16777215))
-        self.list_users.setStyleSheet(_fromUtf8("background-color: gray\n"
-""))
+        self.list_users.setStyleSheet(_fromUtf8("background-color: black;"))
         self.list_users.setObjectName(_fromUtf8("list_users"))
         self.horizontalLayout_3.addWidget(self.list_users)
         self.verticalLayout.addLayout(self.horizontalLayout_3)
