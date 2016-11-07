@@ -172,6 +172,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.input_server.returnPressed.connect(self.login)
         self.input_channel.returnPressed.connect(self.login)
         self.input_client_tag.returnPressed.connect(self.login)
+        self.combo_game_type.currentIndexChanged.connect(self.game_type_changed)
         self.list_games.currentItemChanged.connect(self.get_game_info)
         # Gather and assign all the user input:
         self.username = ''
@@ -195,6 +196,21 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
         self.print_finger = 0
         self.print_stats = 0
         self.print_cons = 0
+
+    def game_type_changed(self):
+        game_type = str(self.combo_game_type.currentText()).lower()
+        self.list_games.clear()
+        print 'runnnnnnnnnnnnnnnnnnnnnnnnnn'
+        print game_type
+        for game in self.games:
+            if game[2] == game_type:
+                if game[4] == 'open':
+                    self.list_games.addItem(game[0])
+
+            elif game_type == 'show all':
+                if game[4] == 'open':
+                    self.list_games.addItem(game[0])
+
 
     def update_game_info(self):
 
@@ -226,13 +242,15 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
     def get_game_info(self):
 
         self.players_in_game = []
-
-        self.selected_game = self.list_games.currentItem().text()
-        self.textedit_game_info.setText('')
-        self.input_game_name.setText(self.selected_game)
-        self.selected_game = self.selected_game.replace(' [Private]', '')
-        self.selected_game = re.findall('(.?.?.?.?.?.?.?.?)', self.selected_game)[0]
-        self.update_game_info()
+        try:
+            self.selected_game = self.list_games.currentItem().text()
+            self.textedit_game_info.setText('')
+            self.input_game_name.setText(self.selected_game)
+            self.selected_game = self.selected_game.replace(' [Private]', '')
+            self.selected_game = re.findall('(.?.?.?.?.?.?.?.?)', self.selected_game)[0]
+            self.update_game_info()
+        except:
+            return
 
     def update_channel(self):
         self.input_channel_2.setText(self.list_channels.currentItem().text())
@@ -266,6 +284,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
             self.stackedWidget.setCurrentIndex(1)
 
     def open_games(self):
+        self.combo_game_type.setCurrentIndex(0)
         self.msg = '/games ' + self.client_tag
         self.get_thread.s.send(self.msg)
         self.get_thread.s.send("\r\n")
@@ -691,6 +710,7 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
 
 
             for game in self.games:
+
                 if game[4] == 'open':
                     self.list_games.addItem(game[0])
 
