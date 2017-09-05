@@ -16,6 +16,3 @@ Link to Windows exe for PyQT4 x64:
   sudo apt-get install python-qt4
 
 Then 'python main.py'
-
-See wiki for screenshots:
-https://github.com/magicvoid1/WarChatter/wiki
