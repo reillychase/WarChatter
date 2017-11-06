@@ -200,7 +200,6 @@ class WarChatter(QtGui.QMainWindow, ui.Ui_MainWindow):
     def game_type_changed(self):
         game_type = str(self.combo_game_type.currentText()).lower()
         self.list_games.clear()
-        print 'runnnnnnnnnnnnnnnnnnnnnnnnnn'
         print game_type
         for game in self.games:
             if game[2] == game_type:

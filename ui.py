@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'warchatter.ui'
 #
-# Created: Mon Nov  7 11:35:51 2016
-#      by: PyQt4 UI code generator 4.10.4
+# Created by: PyQt4 UI code generator 4.11.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -30,7 +29,7 @@ class Ui_MainWindow(object):
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.stackedWidget = QtGui.QStackedWidget(self.centralwidget)
-        self.stackedWidget.setGeometry(QtCore.QRect(10, 0, 791, 561))
+        self.stackedWidget.setGeometry(QtCore.QRect(10, 0, 801, 561))
         self.stackedWidget.setObjectName(_fromUtf8("stackedWidget"))
         self.page_login = QtGui.QWidget()
         self.page_login.setObjectName(_fromUtf8("page_login"))
@@ -38,7 +37,6 @@ class Ui_MainWindow(object):
         self.verticalLayoutWidget_4.setGeometry(QtCore.QRect(10, 20, 781, 531))
         self.verticalLayoutWidget_4.setObjectName(_fromUtf8("verticalLayoutWidget_4"))
         self.verticalLayout_5 = QtGui.QVBoxLayout(self.verticalLayoutWidget_4)
-        self.verticalLayout_5.setMargin(0)
         self.verticalLayout_5.setObjectName(_fromUtf8("verticalLayout_5"))
         self.label_3 = QtGui.QLabel(self.verticalLayoutWidget_4)
         self.label_3.setObjectName(_fromUtf8("label_3"))
@@ -91,7 +89,6 @@ class Ui_MainWindow(object):
         self.verticalLayoutWidget.setGeometry(QtCore.QRect(10, 20, 781, 541))
         self.verticalLayoutWidget.setObjectName(_fromUtf8("verticalLayoutWidget"))
         self.verticalLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget)
-        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
@@ -140,7 +137,8 @@ class Ui_MainWindow(object):
         self.list_users.setSizePolicy(sizePolicy)
         self.list_users.setMinimumSize(QtCore.QSize(175, 0))
         self.list_users.setMaximumSize(QtCore.QSize(175, 16777215))
-        self.list_users.setStyleSheet(_fromUtf8("background-color: black;"))
+        self.list_users.setAutoFillBackground(False)
+        self.list_users.setStyleSheet(_fromUtf8("background-color: black; color: white"))
         self.list_users.setObjectName(_fromUtf8("list_users"))
         self.horizontalLayout_3.addWidget(self.list_users)
         self.verticalLayout.addLayout(self.horizontalLayout_3)
@@ -163,7 +161,6 @@ class Ui_MainWindow(object):
         self.verticalLayoutWidget_3.setGeometry(QtCore.QRect(10, 20, 781, 541))
         self.verticalLayoutWidget_3.setObjectName(_fromUtf8("verticalLayoutWidget_3"))
         self.verticalLayout_10 = QtGui.QVBoxLayout(self.verticalLayoutWidget_3)
-        self.verticalLayout_10.setMargin(0)
         self.verticalLayout_10.setObjectName(_fromUtf8("verticalLayout_10"))
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
@@ -242,7 +239,6 @@ class Ui_MainWindow(object):
         self.verticalLayoutWidget_5.setGeometry(QtCore.QRect(0, 20, 781, 541))
         self.verticalLayoutWidget_5.setObjectName(_fromUtf8("verticalLayoutWidget_5"))
         self.verticalLayout_12 = QtGui.QVBoxLayout(self.verticalLayoutWidget_5)
-        self.verticalLayout_12.setMargin(0)
         self.verticalLayout_12.setObjectName(_fromUtf8("verticalLayout_12"))
         self.horizontalLayout_8 = QtGui.QHBoxLayout()
         self.horizontalLayout_8.setObjectName(_fromUtf8("horizontalLayout_8"))
@@ -376,7 +372,6 @@ class Ui_MainWindow(object):
         self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(0, 20, 781, 541))
         self.verticalLayoutWidget_2.setObjectName(_fromUtf8("verticalLayoutWidget_2"))
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
-        self.verticalLayout_2.setMargin(0)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.horizontalLayout_16 = QtGui.QHBoxLayout()
         self.horizontalLayout_16.setObjectName(_fromUtf8("horizontalLayout_16"))
@@ -435,7 +430,7 @@ class Ui_MainWindow(object):
         self.stackedWidget.addWidget(self.page_channels)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 808, 23))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 808, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(MainWindow)
@@ -469,8 +464,8 @@ class Ui_MainWindow(object):
         self.textedit_chat.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Droid Sans\'; font-size:9pt; font-weight:400; font-style:normal;\" bgcolor=\"#000000\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", None))
+"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\" bgcolor=\"#000000\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Droid Sans\'; font-size:9pt;\"><br /></p></body></html>", None))
         self.button_send.setText(_translate("MainWindow", "Send", None))
         self.button_whisper.setText(_translate("MainWindow", "Whisper", None))
         self.label_2.setText(_translate("MainWindow", "<html><head/><body><p><img src=\":/warchatter/warchatter.png\"/></p></body></html>", None))
