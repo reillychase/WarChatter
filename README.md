@@ -1,7 +1,10 @@
 # WarChatter
 A cross platform PvPGN chatbot written in Python/PyQT4, uses PvPGN's bot/telnet protocol
 
-## Install Instructions
+## See 'releases' tab for Windows and MacOS executables
+- Ver 1.0 released
+
+## Source Code Install Instructions
 - Install Python 2.7
 - Install PyQT4
 
